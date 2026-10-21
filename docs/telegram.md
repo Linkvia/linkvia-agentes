@@ -7,6 +7,7 @@ Telegram tiene la mejor API de bots que existe y es gratis. Si ya hiciste un bot
 **Porque los clientes del negocio no tienen que instalar ni pagar nada.**
 
 - **El alta en Telegram puede costar plata.** En Argentina, para mandar el código de verificación por SMS, la app le pide al usuario que pague una semana de Telegram Premium con tarjeta desde Google Play. Mucha gente abandona en ese paso. En Linkvia el cliente entra desde el link o el QR del negocio, pone su teléfono y el código le llega gratis.
+- **Atender desde la cuenta del negocio también se paga.** La API de bots de Telegram es gratis, pero para conectar un bot a la cuenta del propio negocio (Telegram Business, con horario, bienvenida y respuestas rápidas) hay que pagar Telegram Premium, unos 5 USD por mes. En Linkvia el negocio arranca gratis y el cliente nunca paga.
 - **Se usa igual que WhatsApp.** Es la app que usa casi todo el mundo en Argentina, así que no hay nada que aprender. Telegram tiene otra interfaz y, para muchos clientes, es "otra app más".
 - **Es un lugar solo para negocios.** No hay grupos, canales ni mensajes de desconocidos. El cliente tiene ahí los negocios con los que habla, como contactos.
 - **Confianza y datos personales.** Cada negocio se verifica con su CUIT y su `@handle` queda protegido. El bot recibe un id distinto para cada negocio, así que la pizzería no puede cruzar datos con la heladería. Los datos del cliente (nombre, teléfono, dirección) llegan solo con su permiso, dato por dato, como pide la Ley 25.326. En Telegram el bot recibe un id que es el mismo para todos los bots, y el consentimiento lo resuelve cada uno.
@@ -14,7 +15,7 @@ Telegram tiene la mejor API de bots que existe y es gratis. Si ya hiciste un bot
 
 ## Lo que Telegram hace mejor (por ahora)
 
-Es gratis, mucha gente ya lo tiene instalado y tiene más años de API: mini apps, cobros dentro del chat, app nativa con notificaciones muy confiables. Linkvia hoy es web (se puede agregar a la pantalla del celular) y la app para Android y iPhone viene después del piloto.
+La API de bots es gratis, mucha gente ya lo tiene instalado y tiene más años de API: mini apps, cobros dentro del chat, app nativa con notificaciones muy confiables. Linkvia hoy es web (se puede agregar a la pantalla del celular) y la app para Android y iPhone viene después del piloto.
 
 No son excluyentes: el mismo agente puede atender en los dos lados.
 
