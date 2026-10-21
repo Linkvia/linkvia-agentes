@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/linkvia-logo.svg" alt="Linkvia" height="64"></p>
 
-<h3 align="center">La autopista sin peajes para desplegar tus agentes.</h3>
+<h3 align="center">La autopista para desplegar tus agentes.</h3>
 <p align="center">WhatsApp te cobra cada mensaje, nosotros no.</p>
 
 ---
@@ -15,6 +15,7 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
 - **Sin comisiones** sobre lo que cobrás por tus proyectos.
 - **Todo lo de WhatsApp Business:** botones, listas, carrusel, catálogo, fotos, PDF, ubicación, audios, tildes, "escribiendo…".
 - **Y lo que WhatsApp no tiene:** respuestas que se escriben de a partes (streaming, como ChatGPT), monitoreo cada 5 minutos con aviso si tu bot se cae, y datos del cliente solo con su permiso.
+- **Una persona del negocio puede entrar a la charla:** si tu bot pide ayuda (`handoff`) o el negocio quiere atender en persona, alguien toma la conversación desde el panel, contesta con su nombre y después se la devuelve a tu bot, que recibe el aviso `handback` para ponerse al día.
 - **Si tu bot ya habla con la API de WhatsApp, anda sin reescribirlo:** Linkvia manda el mismo JSON y la misma firma que Meta.
 
 ## Empezá en 5 minutos
