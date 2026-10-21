@@ -47,6 +47,8 @@ Linkvia hace `POST` al webhook con un JSON y espera la respuesta en menos de 10 
 
 **Reacción** (`type: "reaction"`): llega cuando el usuario reacciona con un emoji a un mensaje, tuyo o suyo, como en WhatsApp. Trae la conversación, el usuario y `reaction: { messageId, emoji }`. Si sacó la reacción, `emoji` viene vacío. Un 👍 a tu "¿Te confirmo el pedido?" puede servir como un sí. Es de mejor esfuerzo, como `consent`: lo que respondas se muestra en el chat, y si tu bot falla o no lo conoce, no pasa nada.
 
+**Devuelta al bot** (`type: "handback"`): llega cuando una persona del negocio atendió la charla desde el panel (**Atención**) y se la devuelve al bot. Trae la conversación, el usuario y `handback: { agentName, since }`. Mientras atendía la persona, los mensajes del usuario no le llegaron al bot: para ponerse al día, leé el historial (lo que escribió la persona viene con `agentName`). Lo que respondas se muestra en el chat. **Llega solo si lo activás** en el panel ("Avisarle a mi bot cuando le devuelvo una charla") o con `PATCH /business` `{"handbackEvent": true}`. Es de mejor esfuerzo, como `consent`: si tu bot falla, no cuenta como caída.
+
 **Prueba de conexión** (`type: "ping"`): llega cuando el negocio toca "Probar conexión" y, además, cada 5 minutos desde el monitoreo de Linkvia. Respondé `{"contractVersion":"0","actions":[]}`. Si el bot falla dos veces seguidas (en pings o mensajes), Linkvia lo marca como caído y le avisa al negocio.
 
 ### Verificar la firma
@@ -98,7 +100,9 @@ La respuesta es `{"contractVersion":"0","actions":[...]}`:
 
 ## 4. Escribir después (handoff, avisos de pedido)
 
-Si el agente tarda, o una persona del negocio toma la conversación, el bot puede escribir cuando quiera en una conversación existente:
+**Pasar a una persona:** con la acción `handoff` la charla aparece arriba en la bandeja **Atención** del panel del negocio, marcada "Pide una persona". Ahí alguien del negocio la toma, le contesta con su nombre (el usuario ve "Te atiende Laura, de Pizzería" y el nombre arriba de cada mensaje) y, al terminar, se la devuelve al bot. Mientras la atiende una persona, los mensajes del usuario no le llegan al bot (tampoco a la cola si el bot está caído); hasta que alguien la toma, le siguen llegando. Una persona también puede tomar cualquier charla aunque el bot no haya pedido el pase. La bandeja también se maneja por API: ver la tabla del panel, más abajo.
+
+Si el agente tarda, el bot puede escribir cuando quiera en una conversación existente:
 
 ```bash
 curl -X POST https://linkvia.optis.site/api/bot/v0/messages \
@@ -126,7 +130,7 @@ curl -X POST https://linkvia.optis.site/api/bot/v0/read \
 
 Abajo del nombre del negocio, el usuario ve "en línea" mientras el bot responde bien, y "últ. vez hoy a las 14:32" si está caído.
 
-**Historial:** para que el agente tenga el contexto sin guardarlo, `GET /bot/v0/conversations/<conversation.id>/messages?limit=50` (con la clave de API) devuelve los últimos mensajes de la charla: `{ id, from, sentAt, type, text, url?, replyTo? }`. `text` es el texto completo o un resumen ("📷 Foto") si no es texto; `url` es dónde bajar la foto, el audio o el archivo.
+**Historial:** para que el agente tenga el contexto sin guardarlo, `GET /bot/v0/conversations/<conversation.id>/messages?limit=50` (con la clave de API) devuelve los últimos mensajes de la charla: `{ id, from, sentAt, type, text, url?, replyTo?, agentName? }`. `agentName` viene en lo que escribió una persona del negocio desde el panel. `text` es el texto completo o un resumen ("📷 Foto") si no es texto; `url` es dónde bajar la foto, el audio o el archivo.
 
 **Reintentos:** si la entrega de un mensaje falla rápido (el bot no está, responde 5xx), Linkvia la reintenta una vez al segundo con el mismo `eventId`: si tu bot ya lo había procesado, ignoralo. Si el bot tardó más de 10 segundos no se reintenta, para no hacer esperar más al usuario. Cada intento queda en `GET /business/deliveries` y en el panel.
 
@@ -179,6 +183,12 @@ En `https://linkvia.optis.site/api`, con `authorization: Bearer <apiKey>`:
 | `POST /business/rotate-api-key` | Cambia la clave de API y devuelve la nueva (una sola vez). La anterior deja de servir en el momento |
 | `POST /business/rotate-webhook-secret` | Cambia el secreto del webhook y devuelve el nuevo. Los eventos siguientes se firman con él |
 | `GET /business/deliveries` | Últimas entregas al webhook: evento, si respondió, cuánto tardó y el error |
+| `GET /business/conversations` | La bandeja de atención: las charlas con su último mensaje, primero las que pidieron una persona |
+| `GET /business/conversations/<id>` | Una charla con todos sus mensajes (la marca como leída en el panel) |
+| `POST /business/conversations/<id>/take` | Una persona toma la charla: `{"agentName":"Laura"}`. El bot deja de recibir los mensajes |
+| `POST /business/conversations/<id>/messages` | Contesta como persona: `{"agentName","text"}`, o con `image` o `document`. Si no la había tomado, la toma |
+| `POST /business/conversations/<id>/release` | Se la devuelve al bot (con `handbackEvent`, el bot recibe `handback`) |
+| `GET /business/events` | Avisos en el momento de qué charla cambió (Server-Sent Events), para la bandeja |
 
 ## 7. Link a tu chat
 

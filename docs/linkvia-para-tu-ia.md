@@ -55,6 +55,7 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`. Sa
 - `ping`: prueba de conexión y monitoreo cada 5 minutos. Responder `{"contractVersion":"0","actions":[]}`.
 - `consent`: el cliente respondió un `requestConsent`. Trae `consent: { granted: [], declined: [], revoked?: [], purpose }` y `user.sharedData` ya actualizado. Lo que se responda se muestra en el chat.
 - `reaction`: trae `reaction: { messageId, emoji }`. `emoji` vacío significa que la sacó.
+- `handback`: una persona del negocio atendió la charla desde el panel y se la devolvió al bot. Trae `handback: { agentName, since }`. Mientras tanto el bot no recibió los mensajes: leer el historial para ponerse al día. Llega solo si el negocio lo activó (`PATCH /business` `{"handbackEvent": true}`).
 
 ## Respuesta del webhook
 
@@ -77,7 +78,7 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`. Sa
 | `link` | `text`, `label`, `url` (https), opcional `header`, `footer` |
 | `copyCode` | `text`, `code` (hasta 64 caracteres) |
 | `requestConsent` | `dataTypes: ["name" \| "phone" \| "email" \| "address"]`, `purpose` (para qué, en palabras del cliente) |
-| `handoff` | `reason?`: pasa la charla a una persona del negocio |
+| `handoff` | `reason?`: pasa la charla a una persona del negocio. Aparece arriba en la bandeja **Atención** del panel; mientras una persona la atiende, el bot no recibe los mensajes del cliente |
 
 Límites: 24 caracteres en títulos de botones y opciones, 72 en descripciones de opciones, 60 en `header` y `footer`, 1024 en `text`. Los `id` de un mismo mensaje tienen que ser distintos.
 
@@ -90,7 +91,7 @@ Base `https://linkvia.optis.site/api`, encabezados `authorization: Bearer <LINKV
 | `POST /bot/v0/messages` | `{ contractVersion: "0", conversationId, actions: [...] }` | Mandar un mensaje después (respuesta de IA, aviso de pedido) |
 | `POST /bot/v0/typing` | `{ conversationId }` | Mostrar "escribiendo…" durante 15 segundos |
 | `POST /bot/v0/read` | `{ conversationId }` | Marcar la charla como leída (tildes azules) |
-| `GET /bot/v0/conversations/{id}/messages?limit=50` | | Historial: `[{ id, from, sentAt, type, text, url?, replyTo? }]` |
+| `GET /bot/v0/conversations/{id}/messages?limit=50` | | Historial: `[{ id, from, sentAt, type, text, url?, replyTo?, agentName? }]` (`agentName` = lo escribió una persona del negocio) |
 | `POST /bot/v0/stream` | `{ conversationId }` | Empezar una respuesta de a partes. Devuelve `{ messageId }` |
 | `POST /bot/v0/stream/{messageId}` | `{ text }` | Sumar texto al final (mandar cada 100 a 300 ms, no por token) |
 | `POST /bot/v0/stream/{messageId}/end` | `{}` o `{ text }` | Terminarla. Con `text`, ese reemplaza todo. Sin nada en 60 s se cierra sola |
