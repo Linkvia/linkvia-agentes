@@ -74,7 +74,7 @@ Una conversación empieza cuando el cliente escribe después de 24 horas sin hab
 ## Preguntas frecuentes
 
 **¿Por qué elegir Linkvia en vez de Telegram?**
-Porque los clientes del negocio no tienen que instalar ni pagar nada. En Argentina, para mandar el código de verificación por SMS, Telegram le pide al usuario que pague una semana de Telegram Premium con tarjeta desde Google Play, y muchos abandonan ahí. En Linkvia entran desde el link del negocio, el código les llega gratis y la app se usa igual que WhatsApp. Además, cada negocio está verificado, los datos del cliente llegan solo con su permiso y Linkvia avisa si el bot deja de responder. Más detalle y cómo llevar un bot de Telegram en [docs/telegram.md](docs/telegram.md).
+Porque los clientes del negocio no tienen que instalar ni pagar nada. En Argentina, para mandar el código de verificación por SMS, Telegram le pide al usuario que pague una semana de Telegram Premium con tarjeta desde Google Play, y muchos abandonan ahí. Y para que el bot atienda desde la cuenta del propio negocio (Telegram Business), el negocio tiene que pagar Telegram Premium todos los meses. En Linkvia el cliente nunca paga, el negocio arranca gratis y los clientes entran desde el link del negocio, el código les llega gratis y la app se usa igual que WhatsApp. Además, cada negocio está verificado, los datos del cliente llegan solo con su permiso y Linkvia avisa si el bot deja de responder. Más detalle y cómo llevar un bot de Telegram en [docs/telegram.md](docs/telegram.md).
 
 **¿Tengo que dejar WhatsApp o Telegram?**
 No. El mismo agente puede atender en los tres lados; cambia solo la capa que habla con cada mensajero.
