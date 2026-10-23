@@ -2,12 +2,12 @@
 
 Cuatro agentes listos para que un emprendedor los adapte a un negocio y se los cobre por mes. Cada uno resuelve un problema que tienen miles de locales iguales, así que el mismo trabajo se vende muchas veces.
 
-| Plantilla | Para quién | Qué hace | Precio sugerido al negocio |
+| Plantilla | Para quién | Qué hace | Cuánto cobrarle al negocio |
 |---|---|---|---|
-| [Turnos de belleza](turnos-belleza/) | Peluquería, barbería, uñas, estética | Agenda, seña, recordatorio, cancelaciones, lista de espera | $12.000 a $20.000 por mes |
-| [Gastronomía](gastronomia/) | Rotisería, pizzería, viandas, sushi, heladería: cualquier local con delivery o take away | Menú, pedido, zonas de envío, pago, aviso de "salió" o "listo" | $15.000 a $25.000 por mes |
-| [Canchas](canchas/) | Pádel, fútbol 5, tenis, complejos | Horarios libres, seña, lista de espera, link para que se sumen los amigos | $15.000 a $25.000 por mes |
-| [Clases](clases/) | Gimnasio, yoga, pilates, danza, funcional | Cupos, lista de espera, recordatorio, cuota del mes | $12.000 a $20.000 por mes |
+| [Turnos de belleza](turnos-belleza/) | Peluquería, barbería, uñas, estética | Agenda, seña, recordatorio, cancelaciones, lista de espera | Más de $24.000 por mes |
+| [Gastronomía](gastronomia/) | Rotisería, pizzería, viandas, sushi, heladería: cualquier local con delivery o take away | Menú, pedido, zonas de envío, pago, aviso de "salió" o "listo" | Más de $30.000 por mes |
+| [Canchas](canchas/) | Pádel, fútbol 5, tenis, complejos | Horarios libres, seña, lista de espera, link para que se sumen los amigos | Más de $30.000 por mes |
+| [Clases](clases/) | Gimnasio, yoga, pilates, danza, funcional | Cupos, lista de espera, recordatorio, cuota del mes | Más de $24.000 por mes |
 
 Los precios son orientativos (octubre de 2026). Un local chico entra en el plan Free de Linkvia (300 conversaciones por mes), así que lo que cobrás es casi todo margen.
 

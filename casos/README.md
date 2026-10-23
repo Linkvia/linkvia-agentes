@@ -1,6 +1,6 @@
 # Casos de estudio: agentes que paga el usuario
 
-Ideas de agentes de consumo para que un emprendedor diga "esto lo hago yo". No son plantillas terminadas: cada caso cuenta el problema, cómo sería la charla, cómo cobrarlo y qué cuidar. Si armás alguno, contanos y lo sumamos al directorio de [linkvia.com.ar](https://www.linkvia.com.ar/).
+Ideas de agentes de consumo para que un emprendedor diga "esto lo hago yo". No son plantillas terminadas: cada caso cuenta el problema, cómo sería la charla, cómo cobrarlo y qué cuidar. Si armás alguno, contanos y lo sumamos a la [Agent Store de Linkvia](https://www.linkvia.com.ar/agent-store.html).
 
 | Caso | En una línea | Cobro que mejor encaja | Cuidado especial |
 |---|---|---|---|

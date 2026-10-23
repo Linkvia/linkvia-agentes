@@ -37,7 +37,7 @@ Agente para estudios y gimnasios con clases de cupo limitado: yoga, pilates, fun
 
 - **A quién:** estudios de 1 a 3 salas que hoy arman la lista en un grupo de WhatsApp ("¿quién viene mañana?").
 - **El argumento:** "Las clases se llenan sin perseguir a nadie, los que faltan liberan el lugar y la cuota se cobra sola. Y los alumnos no quedan en un grupo con 80 personas."
-- **Precio:** $12.000 a $20.000 por mes.
+- **Precio:** cobrá más de $24.000 por mes.
 
 ## Ideas para sumar
 

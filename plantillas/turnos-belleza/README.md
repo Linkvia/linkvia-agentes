@@ -41,7 +41,7 @@ Agente de turnos para peluquería, barbería, uñas, estética o depilación. El
 - **A quién:** locales con 1 a 5 puestos que hoy toman turnos por WhatsApp a mano y pierden clientes porque contestan tarde o se olvidan.
 - **El argumento:** "Tus clientas sacan turno solas a las 11 de la noche, pagan la seña y el día antes les llega el recordatorio. Menos ausencias y nadie atado al celular."
 - **La seña es la estrella:** con un 10% menos de ausencias, el agente se paga solo.
-- **Precio:** $12.000 a $20.000 por mes. Podés cobrar una puesta en marcha (carga de servicios, QR impreso) de $20.000 a $40.000.
+- **Precio:** cobrá más de $24.000 por mes. Podés cobrar una puesta en marcha (carga de servicios, QR impreso) de $20.000 a $40.000.
 - **Objeción "mis clientas usan WhatsApp":** el link abre Linkvia en el navegador y entran con su celular; se usa igual que WhatsApp. Al local no le cuesta nada por mensaje.
 
 ## Ideas para sumar

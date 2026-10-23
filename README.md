@@ -53,7 +53,7 @@ Próximamente: plantillas para n8n, Make y Botpress, y un ejemplo con un modelo 
 
 ## Vendé tu agente
 
-Armá un agente una vez y vendéselo a muchos negocios iguales por una cuota mensual. Un local chico entra en el plan Free de Linkvia, así que lo que cobrás es casi todo margen. Empezá por una [plantilla](plantillas/): cambiás el `config.json` con los datos del negocio, lo probás con el simulador y lo conectás. Si querés que tu agente aparezca en el directorio de [linkvia.com.ar](https://www.linkvia.com.ar/#directorio), escribinos.
+Armá un agente una vez y vendéselo a muchos negocios iguales por una cuota mensual. Un local chico entra en el plan Free de Linkvia, así que lo que cobrás es casi todo margen. Empezá por una [plantilla](plantillas/): cambiás el `config.json` con los datos del negocio, lo probás con el simulador y lo conectás. Si querés que tu agente aparezca en la [Agent Store](https://www.linkvia.com.ar/agent-store.html), escribinos. Más en [Ganá dinero con tus agentes](https://www.linkvia.com.ar/emprendedores.html).
 
 ## Cómo funciona, en un vistazo
 

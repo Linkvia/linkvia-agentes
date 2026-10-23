@@ -37,7 +37,7 @@ Agente de reservas para complejos de pádel, fútbol 5, tenis o cualquier deport
 - **A quién:** complejos que hoy manejan la grilla en un cuaderno o en un Excel y contestan WhatsApp todo el día.
 - **El argumento:** "La grilla se llena sola, la seña entra antes y si alguien cancela, otro toma el turno en minutos. Las canchas vacías son plata perdida."
 - **El gancho del link:** cada partido trae a 3 o 9 personas más al chat del complejo. Es publicidad gratis.
-- **Precio:** $15.000 a $25.000 por mes, según la cantidad de canchas.
+- **Precio:** cobrá más de $30.000 por mes, según la cantidad de canchas.
 
 ## Ideas para sumar
 

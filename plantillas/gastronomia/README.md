@@ -38,7 +38,7 @@ Agente de pedidos para cualquier local de comida con envío o retiro: rotisería
 - **A quién:** locales que hoy reciben pedidos por WhatsApp o por teléfono y se les traban los viernes a la noche.
 - **El argumento:** "El pedido te llega ordenado, con dirección y pagado. Nadie escribe 'qué tenés de empanadas' diez veces. Y sin comisión por pedido como en las apps de delivery."
 - **Frente a PedidosYa o Rappi:** no compite, complementa. Es el canal propio del local, sin el 20 a 30% de comisión, para los clientes que ya lo conocen.
-- **Precio:** $15.000 a $25.000 por mes, más la carga inicial del menú con fotos.
+- **Precio:** cobrá más de $30.000 por mes, más la carga inicial del menú con fotos.
 
 ## Ideas para sumar
 
