@@ -1,0 +1,19 @@
+{
+  "negocio": "Estudio Prana",
+  "bienvenida": "¡Hola! Soy el asistente de *Estudio Prana*. ¿Qué necesitás?",
+  "direccion": "Belgrano 890, Rosario",
+  "clases": [
+    { "id": "yoga-lun", "nombre": "Yoga", "dia": "lun", "hora": "08:00", "duracion": 60, "cupo": 12, "profe": "Caro" },
+    { "id": "pilates-lun", "nombre": "Pilates", "dia": "lun", "hora": "19:00", "duracion": 60, "cupo": 8, "profe": "Mati" },
+    { "id": "funcional-mar", "nombre": "Funcional", "dia": "mar", "hora": "18:30", "duracion": 50, "cupo": 15, "profe": "Mati" },
+    { "id": "yoga-mie", "nombre": "Yoga", "dia": "mie", "hora": "08:00", "duracion": 60, "cupo": 12, "profe": "Caro" },
+    { "id": "pilates-jue", "nombre": "Pilates", "dia": "jue", "hora": "19:00", "duracion": 60, "cupo": 8, "profe": "Mati" },
+    { "id": "yoga-sab", "nombre": "Yoga suave", "dia": "sab", "hora": "10:00", "duracion": 75, "cupo": 12, "profe": "Caro" }
+  ],
+  "diasAdelante": 7,
+  "cancelarHastaHorasAntes": 2,
+  "recordatorioHorasAntes": 3,
+  "cuota": { "monto": 30000, "venceElDia": 10 },
+  "exigirCuotaAlDia": false,
+  "linkDePago": "https://link.mercadopago.com.ar/tu-negocio"
+}

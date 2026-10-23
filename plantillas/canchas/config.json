@@ -1,0 +1,29 @@
+{
+  "negocio": "Complejo La Red",
+  "bienvenida": "¡Hola! Soy el asistente de reservas de *Complejo La Red*. ¿Jugamos?",
+  "direccion": "Ruta 20 km 5, Villa Carlos Paz",
+  "deportes": {
+    "padel": { "nombre": "Pádel", "duracion": 90, "precio": 24000, "jugadores": 4 },
+    "futbol5": { "nombre": "Fútbol 5", "duracion": 60, "precio": 40000, "jugadores": 10 }
+  },
+  "canchas": [
+    { "id": "p1", "nombre": "Pádel 1", "deporte": "padel" },
+    { "id": "p2", "nombre": "Pádel 2", "deporte": "padel" },
+    { "id": "f1", "nombre": "Fútbol 5 techada", "deporte": "futbol5" }
+  ],
+  "horario": {
+    "lun": [["09:00", "23:30"]],
+    "mar": [["09:00", "23:30"]],
+    "mie": [["09:00", "23:30"]],
+    "jue": [["09:00", "23:30"]],
+    "vie": [["09:00", "23:59"]],
+    "sab": [["09:00", "23:59"]],
+    "dom": [["09:00", "22:00"]]
+  },
+  "pasoMinutos": 30,
+  "diasAdelante": 7,
+  "anticipacionMinutos": 30,
+  "recordatorioHorasAntes": 3,
+  "sena": { "porcentaje": 50, "minutosParaPagar": 30 },
+  "linkDePago": "https://link.mercadopago.com.ar/tu-negocio"
+}

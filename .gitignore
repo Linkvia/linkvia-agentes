@@ -1,3 +1,9 @@
 node_modules/
 __pycache__/
 .env
+# Datos de clientes que generan las plantillas
+plantillas/*/turnos.json
+plantillas/*/pedidos.json
+plantillas/*/reservas.json
+plantillas/*/clases.json
+*.json.tmp
