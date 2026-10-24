@@ -6,9 +6,9 @@
 
 Una app de chat igual a WhatsApp en la que del otro lado contesta el agente (bot) de un negocio. El negocio conecta su propio bot por **webhook**. Linkvia le manda cada evento por `POST` y el bot contesta con un JSON de acciones.
 
-- App y panel del negocio: `https://linkvia.optis.site` (registro en `/#/negocios`).
-- API: `https://linkvia.optis.site/api`.
-- Link al chat de un negocio: `https://linkvia.optis.site/@<handle>` (con `?text=` opcional).
+- App y panel del negocio: `https://app.linkvia.com.ar` (registro en `/#/negocios`).
+- API: `https://app.linkvia.com.ar/api`.
+- Link al chat de un negocio: `https://app.linkvia.com.ar/@<handle>` (con `?text=` opcional).
 - Versión del contrato: `"0"`. Va en `contractVersion` de todo lo que se manda y se recibe.
 
 ## Credenciales (las da el registro, una sola vez)
@@ -84,7 +84,7 @@ Límites: 24 caracteres en títulos de botones y opciones, 72 en descripciones d
 
 ## API (para escribir por iniciativa propia)
 
-Base `https://linkvia.optis.site/api`, encabezados `authorization: Bearer <LINKVIA_API_KEY>` y `content-type: application/json`. Solo en conversaciones del propio negocio.
+Base `https://app.linkvia.com.ar/api`, encabezados `authorization: Bearer <LINKVIA_API_KEY>` y `content-type: application/json`. Solo en conversaciones del propio negocio.
 
 | Método y ruta | Cuerpo | Para qué |
 |---|---|---|
@@ -131,4 +131,4 @@ createServer(async (req, res) => {
 
 ## Si el bot ya está hecho para la API de WhatsApp
 
-No hace falta reescribirlo. En el panel se elige "La API de WhatsApp" y en el bot se cambia la base `https://graph.facebook.com/v21.0` por `https://linkvia.optis.site/api/wa/v21.0`, el `phone_number_id` por el handle, el token por `LINKVIA_API_KEY` y el app secret y el verify token por `LINKVIA_WEBHOOK_SECRET`. Linkvia manda el mismo JSON y la misma firma `X-Hub-Signature-256` que Meta.
+No hace falta reescribirlo. En el panel se elige "La API de WhatsApp" y en el bot se cambia la base `https://graph.facebook.com/v21.0` por `https://app.linkvia.com.ar/api/wa/v21.0`, el `phone_number_id` por el handle, el token por `LINKVIA_API_KEY` y el app secret y el verify token por `LINKVIA_WEBHOOK_SECRET`. Linkvia manda el mismo JSON y la misma firma `X-Hub-Signature-256` que Meta.

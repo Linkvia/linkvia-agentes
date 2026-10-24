@@ -20,7 +20,7 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
 
 ## Empezá en 5 minutos
 
-1. Registrá el negocio en [linkvia.optis.site/#/negocios](https://linkvia.optis.site/#/negocios) y guardá el secreto del webhook.
+1. Registrá el negocio en [negocios.linkvia.com.ar](https://negocios.linkvia.com.ar/) y guardá el secreto del webhook.
 2. Copiá un bot de ejemplo y arrancalo:
 
    ```bash
@@ -30,7 +30,7 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
    ```
 
 3. Hacelo público (por ejemplo con `cloudflared tunnel --url http://localhost:4000`) y poné esa dirección como webhook.
-4. Abrí `https://linkvia.optis.site/@tu_handle` y escribí "hola".
+4. Abrí `https://app.linkvia.com.ar/@tu_handle` y escribí "hola".
 
 La guía paso a paso está en **[docs/empezar-en-5-minutos.md](docs/empezar-en-5-minutos.md)**.
 

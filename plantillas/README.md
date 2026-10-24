@@ -23,7 +23,7 @@ La carpeta [`comun/`](comun/) tiene lo que comparten: la firma de Linkvia, el en
 
 ## Ponerlo en marcha
 
-1. **Registrá el negocio** en [linkvia.optis.site/#/negocios](https://linkvia.optis.site/#/negocios). Guardá el secreto del webhook (`whsec_…`) y la clave de API (`lv_…`): se muestran una sola vez.
+1. **Registrá el negocio** en [negocios.linkvia.com.ar](https://negocios.linkvia.com.ar/). Guardá el secreto del webhook (`whsec_…`) y la clave de API (`lv_…`): se muestran una sola vez.
 2. **Copiá la carpeta** de la plantilla junto con `comun/` (las plantillas importan `../comun/`).
 3. **Editá `config.json`** con los datos del negocio.
 4. **Probalo en tu compu** con el simulador, sin Linkvia:
@@ -39,7 +39,7 @@ La carpeta [`comun/`](comun/) tiene lo que comparten: la firma de Linkvia, el en
    Escribí "hola" y elegí las opciones por número. El panel queda en `http://localhost:4000/panel` (usuario `negocio`, clave `prueba`).
 5. **Publicalo** en un servidor con disco (un VPS chico, o un servicio como Railway o Render con disco persistente: los datos se guardan en un archivo JSON). Para probar rápido alcanza con `cloudflared tunnel --url http://localhost:4000`.
 6. **Conectalo:** en el panel de Linkvia, poné la dirección pública como webhook y tocá "Probar conexión".
-7. **Compartí el link** `https://linkvia.optis.site/@tu_handle` o el QR del panel en el local, en Instagram y en Google Maps.
+7. **Compartí el link** `https://app.linkvia.com.ar/@tu_handle` o el QR del panel en el local, en Instagram y en Google Maps.
 
 ## Variables de entorno
 

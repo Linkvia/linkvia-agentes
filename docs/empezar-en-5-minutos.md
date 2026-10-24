@@ -11,7 +11,7 @@ Esta guía arma un bot que saluda, muestra botones y pasa a una persona. Despué
 
 ## 1. Registrá el negocio
 
-Entrá a [linkvia.optis.site/#/negocios](https://linkvia.optis.site/#/negocios) y completá:
+Entrá a [negocios.linkvia.com.ar](https://negocios.linkvia.com.ar/) y completá:
 
 - **Nombre** y **@handle**: el `@handle` es la dirección del chat, por ejemplo `@donluis`.
 - **CUIT** del negocio: es opcional, pero le da al negocio la marca de verificado.
@@ -60,9 +60,9 @@ En el panel tocá **Probar conexión**. Linkvia le manda un `ping` a tu bot y te
 
 ## 5. Chateá con tu agente
 
-Abrí `https://linkvia.optis.site/@tu_handle` desde el celular y escribí "hola". Tu bot contesta con dos botones: **Ver el menú** y **Hablar con alguien**.
+Abrí `https://app.linkvia.com.ar/@tu_handle` desde el celular y escribí "hola". Tu bot contesta con dos botones: **Ver el menú** y **Hablar con alguien**.
 
-Ese mismo link es el que el negocio comparte con sus clientes o pone en un QR, como el wa.me de WhatsApp. Con `?text=` el chat se abre con un texto ya escrito: `https://linkvia.optis.site/@donluis?text=Quiero%20hacer%20un%20pedido`.
+Ese mismo link es el que el negocio comparte con sus clientes o pone en un QR, como el wa.me de WhatsApp. Con `?text=` el chat se abre con un texto ya escrito: `https://app.linkvia.com.ar/@donluis?text=Quiero%20hacer%20un%20pedido`.
 
 ## Cómo funciona
 
@@ -112,8 +112,8 @@ Los campos de cada una están en la [guía completa](conectar-un-bot.md#3-respon
 Un modelo de lenguaje suele tardar más de 10 segundos. En ese caso:
 
 1. Contestá el webhook enseguida con `"actions": []`.
-2. Avisá que estás escribiendo: `POST https://linkvia.optis.site/api/bot/v0/typing` con `{"conversationId": "…"}`.
-3. Mandá la respuesta cuando la tengas: `POST https://linkvia.optis.site/api/bot/v0/messages` con `{"contractVersion":"0","conversationId":"…","actions":[…]}`.
+2. Avisá que estás escribiendo: `POST https://app.linkvia.com.ar/api/bot/v0/typing` con `{"conversationId": "…"}`.
+3. Mandá la respuesta cuando la tengas: `POST https://app.linkvia.com.ar/api/bot/v0/messages` con `{"contractVersion":"0","conversationId":"…","actions":[…]}`.
 
 Las dos llamadas llevan el encabezado `authorization: Bearer lv_…`. También podés mandar la respuesta de a partes, para que el cliente la vea escribirse como en ChatGPT, y pedir el historial de la charla para darle contexto a tu modelo. Está todo en la [guía completa](conectar-un-bot.md#5-agentes-de-ia-contestar-más-tarde-y-de-a-partes).
 

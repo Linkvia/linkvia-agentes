@@ -9,7 +9,7 @@ Si el bot ya está hecho para la API de WhatsApp, no hace falta reescribirlo: ve
 Desde la app, en **¿Tenés un negocio? Conectá tu agente** (`/#/negocios`), o por API:
 
 ```bash
-curl -X POST https://linkvia.optis.site/api/businesses -H 'content-type: application/json' -d '{
+curl -X POST https://app.linkvia.com.ar/api/businesses -H 'content-type: application/json' -d '{
   "handle": "pizzeria",
   "name": "Pizzería Don Luis",
   "description": "Pizzas a la piedra",
@@ -105,7 +105,7 @@ La respuesta es `{"contractVersion":"0","actions":[...]}`:
 Si el agente tarda, el bot puede escribir cuando quiera en una conversación existente:
 
 ```bash
-curl -X POST https://linkvia.optis.site/api/bot/v0/messages \
+curl -X POST https://app.linkvia.com.ar/api/bot/v0/messages \
   -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' \
   -d '{"contractVersion":"0","conversationId":"<conversation.id del evento>","actions":[{"type":"text","text":"Tu pedido salió"}]}'
 ```
@@ -115,7 +115,7 @@ Solo funciona en conversaciones del propio negocio y mientras el usuario lo teng
 Mientras prepara una respuesta que tarda, el bot puede avisar que está escribiendo. El usuario ve "escribiendo…" hasta que llega el mensaje o pasan 15 segundos (si tarda más, que vuelva a avisar):
 
 ```bash
-curl -X POST https://linkvia.optis.site/api/bot/v0/typing \
+curl -X POST https://app.linkvia.com.ar/api/bot/v0/typing \
   -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' \
   -d '{"conversationId":"<conversation.id del evento>"}'
 ```
@@ -123,7 +123,7 @@ curl -X POST https://linkvia.optis.site/api/bot/v0/typing \
 **Tildes:** cada mensaje del usuario muestra un tilde gris cuando queda en Linkvia y dos grises cuando le llega a tu webhook. Pasan a dos azules cuando el bot lo lee: cuando responde algo, avisa que está escribiendo o escribe por su cuenta. Si tu bot lee y no contesta enseguida (o no contesta), puede marcar la charla como leída:
 
 ```bash
-curl -X POST https://linkvia.optis.site/api/bot/v0/read \
+curl -X POST https://app.linkvia.com.ar/api/bot/v0/read \
   -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' \
   -d '{"conversationId":"<conversation.id del evento>"}'
 ```
@@ -146,18 +146,18 @@ Un agente con un modelo de lenguaje suele tardar más de los 10 segundos que Lin
 
 ```bash
 # Empezar: devuelve el id de la respuesta
-curl -X POST https://linkvia.optis.site/api/bot/v0/stream \
+curl -X POST https://app.linkvia.com.ar/api/bot/v0/stream \
   -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' \
   -d '{"conversationId":"<conversation.id del evento>"}'
 # → {"messageId":"..."}
 
 # Sumar texto, las veces que haga falta (se agrega al final)
-curl -X POST https://linkvia.optis.site/api/bot/v0/stream/<messageId> \
+curl -X POST https://app.linkvia.com.ar/api/bot/v0/stream/<messageId> \
   -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' \
   -d '{"text":"Hola, "}'
 
 # Terminar. Con "text", ese reemplaza todo (por ejemplo, la respuesta final del modelo)
-curl -X POST https://linkvia.optis.site/api/bot/v0/stream/<messageId>/end \
+curl -X POST https://app.linkvia.com.ar/api/bot/v0/stream/<messageId>/end \
   -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' -d '{}'
 ```
 
@@ -170,7 +170,7 @@ curl -X POST https://linkvia.optis.site/api/bot/v0/stream/<messageId>/end \
 
 ## 6. Panel del negocio
 
-En `https://linkvia.optis.site/api`, con `authorization: Bearer <apiKey>`:
+En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`:
 
 | Ruta | Qué hace |
 | --- | --- |
@@ -192,7 +192,7 @@ En `https://linkvia.optis.site/api`, con `authorization: Bearer <apiKey>`:
 
 ## 7. Link a tu chat
 
-Como wa.me en WhatsApp, `https://linkvia.optis.site/@tu_handle` abre el chat con tu agente; si la persona no tenía tu negocio en sus chats, se agrega solo, y si no había entrado a Linkvia, entra primero. Con `?text=` el chat se abre con ese texto ya escrito, sin mandarlo: `https://linkvia.optis.site/@pizzeria?text=Quiero%20hacer%20un%20pedido`. Si ya había algo escrito, no se pisa. Tu link está en el panel del negocio, con un botón para copiarlo.
+Como wa.me en WhatsApp, `https://app.linkvia.com.ar/@tu_handle` abre el chat con tu agente; si la persona no tenía tu negocio en sus chats, se agrega solo, y si no había entrado a Linkvia, entra primero. Con `?text=` el chat se abre con ese texto ya escrito, sin mandarlo: `https://app.linkvia.com.ar/@pizzeria?text=Quiero%20hacer%20un%20pedido`. Si ya había algo escrito, no se pisa. Tu link está en el panel del negocio, con un botón para copiarlo.
 
 ## Probarlo con el bot de ejemplo
 

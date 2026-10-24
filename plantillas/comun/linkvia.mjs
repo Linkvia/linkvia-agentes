@@ -5,8 +5,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const SECRETO = process.env.LINKVIA_WEBHOOK_SECRET;
 const CLAVE_API = process.env.LINKVIA_API_KEY;
-const API = (process.env.LINKVIA_API_URL || "https://linkvia.optis.site/api").replace(/\/$/, "");
-export const APP = (process.env.LINKVIA_APP_URL || "https://linkvia.optis.site").replace(/\/$/, "");
+const API = (process.env.LINKVIA_API_URL || "https://app.linkvia.com.ar/api").replace(/\/$/, "");
+export const APP = (process.env.LINKVIA_APP_URL || "https://app.linkvia.com.ar").replace(/\/$/, "");
 
 /** Comprueba que el evento viene de Linkvia (encabezado linkvia-signature). */
 export function firmaValida(cuerpo, encabezado = "") {

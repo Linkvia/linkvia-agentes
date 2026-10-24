@@ -9,7 +9,7 @@ Un bot que ya funciona con la API de WhatsApp (la Cloud API de Meta) anda en Lin
 
 | En WhatsApp | En Linkvia |
 | --- | --- |
-| `https://graph.facebook.com/v21.0` | `https://linkvia.optis.site/api/wa/v21.0` (la versión puede ser cualquiera) |
+| `https://graph.facebook.com/v21.0` | `https://app.linkvia.com.ar/api/wa/v21.0` (la versión puede ser cualquiera) |
 | `phone_number_id` | el `@handle` del negocio, sin la arroba |
 | Token de acceso | la clave de API (`lv_…`) |
 | App secret (firma `X-Hub-Signature-256`) | el secreto del webhook (`whsec_…`) |
