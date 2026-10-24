@@ -1,0 +1,25 @@
+{
+  "negocio": "Peluquería Ana",
+  "bienvenida": "¡Hola! Soy el asistente de turnos de *Peluquería Ana*. ¿Qué necesitás?",
+  "direccion": "Av. Colón 1234, Córdoba",
+  "servicios": [
+    { "id": "corte", "nombre": "Corte", "duracion": 30, "precio": 12000 },
+    { "id": "corte-barba", "nombre": "Corte y barba", "duracion": 45, "precio": 16000 },
+    { "id": "color", "nombre": "Color", "duracion": 90, "precio": 35000 },
+    { "id": "manos", "nombre": "Manicura", "duracion": 45, "precio": 14000 }
+  ],
+  "puestos": ["Ana", "Lucía"],
+  "horario": {
+    "mar": [["09:00", "13:00"], ["15:00", "20:00"]],
+    "mie": [["09:00", "13:00"], ["15:00", "20:00"]],
+    "jue": [["09:00", "13:00"], ["15:00", "20:00"]],
+    "vie": [["09:00", "20:00"]],
+    "sab": [["09:00", "14:00"]]
+  },
+  "pasoMinutos": 30,
+  "diasAdelante": 14,
+  "anticipacionMinutos": 60,
+  "recordatorioHorasAntes": 24,
+  "sena": { "porcentaje": 30, "minutosParaPagar": 30 },
+  "linkDePago": "https://link.mercadopago.com.ar/tu-negocio"
+}

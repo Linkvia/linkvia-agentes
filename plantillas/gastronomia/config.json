@@ -1,0 +1,50 @@
+{
+  "negocio": "Rotisería Don Luis",
+  "bienvenida": "¡Hola! Bienvenido a *Rotisería Don Luis*. ¿Qué te preparamos hoy?",
+  "menu": [
+    {
+      "categoria": "Pizzas",
+      "items": [
+        { "id": "muzza", "nombre": "Muzzarella", "descripcion": "Grande, 8 porciones", "precio": 12000 },
+        { "id": "napo", "nombre": "Napolitana", "descripcion": "Con tomate y ajo", "precio": 14000 },
+        { "id": "fugazzeta", "nombre": "Fugazzeta", "descripcion": "Rellena de queso", "precio": 15000 }
+      ]
+    },
+    {
+      "categoria": "Empanadas",
+      "items": [
+        { "id": "emp-carne", "nombre": "Empanada de carne", "descripcion": "Cortada a cuchillo", "precio": 1500 },
+        { "id": "emp-jyq", "nombre": "Empanada de jamón y queso", "precio": 1500 },
+        { "id": "docena", "nombre": "Docena surtida", "precio": 16000 }
+      ]
+    },
+    {
+      "categoria": "Bebidas",
+      "items": [
+        { "id": "gaseosa", "nombre": "Gaseosa 1,5 L", "precio": 3500 },
+        { "id": "agua", "nombre": "Agua 500 ml", "precio": 1500 }
+      ]
+    }
+  ],
+  "delivery": {
+    "activo": true,
+    "minimo": 10000,
+    "demoraMinutos": 45,
+    "zonas": [
+      { "id": "centro", "nombre": "Centro", "costo": 1500 },
+      { "id": "norte", "nombre": "Barrio Norte", "costo": 2500 },
+      { "id": "lejos", "nombre": "Otros barrios", "costo": 3500 }
+    ]
+  },
+  "retiro": { "activo": true, "direccion": "San Martín 456", "demoraMinutos": 20 },
+  "pago": "a_eleccion",
+  "horario": {
+    "mar": [["11:30", "15:00"], ["19:30", "23:59"]],
+    "mie": [["11:30", "15:00"], ["19:30", "23:59"]],
+    "jue": [["11:30", "15:00"], ["19:30", "23:59"]],
+    "vie": [["11:30", "15:00"], ["19:30", "23:59"]],
+    "sab": [["11:30", "15:00"], ["19:30", "23:59"]],
+    "dom": [["19:30", "23:59"]]
+  },
+  "linkDePago": "https://link.mercadopago.com.ar/tu-negocio"
+}

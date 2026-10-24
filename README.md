@@ -20,7 +20,7 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
 
 ## Empezá en 5 minutos
 
-1. Registrá el negocio en [linkvia.optis.site/#/negocios](https://linkvia.optis.site/#/negocios) y guardá el secreto del webhook.
+1. Registrá el negocio en [negocios.linkvia.com.ar](https://negocios.linkvia.com.ar/) y guardá el secreto del webhook.
 2. Copiá un bot de ejemplo y arrancalo:
 
    ```bash
@@ -30,7 +30,7 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
    ```
 
 3. Hacelo público (por ejemplo con `cloudflared tunnel --url http://localhost:4000`) y poné esa dirección como webhook.
-4. Abrí `https://linkvia.optis.site/@tu_handle` y escribí "hola".
+4. Abrí `https://app.linkvia.com.ar/@tu_handle` y escribí "hola".
 
 La guía paso a paso está en **[docs/empezar-en-5-minutos.md](docs/empezar-en-5-minutos.md)**.
 
@@ -45,8 +45,15 @@ La guía paso a paso está en **[docs/empezar-en-5-minutos.md](docs/empezar-en-5
 | [docs/linkvia-para-tu-ia.md](docs/linkvia-para-tu-ia.md) | El contrato resumido para pasarle a Claude, ChatGPT o Cursor y que te escriba el bot |
 | [ejemplos/node/bot.mjs](ejemplos/node/bot.mjs) | Bot mínimo en Node 18+, sin dependencias |
 | [ejemplos/python/bot.py](ejemplos/python/bot.py) | Bot mínimo en Python 3.9+, sin dependencias |
+| [plantillas/](plantillas/) | **Agentes listos para vender** a negocios: turnos de belleza, gastronomía con delivery y take away, canchas y clases. Con panel, seña y cobro |
+| [casos/](casos/) | **Ideas de agentes de consumo** con cómo cobrarlos: vencimientos, gastos, inglés, lista de compras y más |
+| [docs/cobrar-con-mercado-pago.md](docs/cobrar-con-mercado-pago.md) | Cómo cobra tu agente con la cuenta de Mercado Pago del negocio |
 
 Próximamente: plantillas para n8n, Make y Botpress, y un ejemplo con un modelo de IA.
+
+## Vendé tu agente
+
+Armá un agente una vez y vendéselo a muchos negocios iguales por una cuota mensual. Un local chico entra en el plan Free de Linkvia, así que lo que cobrás es casi todo margen. Empezá por una [plantilla](plantillas/): cambiás el `config.json` con los datos del negocio, lo probás con el simulador y lo conectás. Si querés que tu agente aparezca en la [Agent Store](https://www.linkvia.com.ar/agent-store.html), escribinos. Más en [Ganá dinero con tus agentes](https://www.linkvia.com.ar/emprendedores.html).
 
 ## Cómo funciona, en un vistazo
 
@@ -71,6 +78,8 @@ Cliente en Linkvia ──► Linkvia ──POST firmado──► tu webhook
 | 300 conversaciones por mes | 2.000 conversaciones, después USD 0,01 cada una | 20.000 conversaciones, después USD 0,005 cada una |
 
 Una conversación empieza cuando el cliente escribe después de 24 horas sin hablar. Lo que el agente conteste en esa charla no suma.
+
+**Para creadores** de agentes con suscriptores que los usan todos los días (inglés, vencimientos, gastos): plan **Creador**, USD 0,08 por persona activa al mes, mínimo USD 15. Mide personas en lugar de conversaciones. Está en camino; mientras tanto se aplican los planes de arriba.
 
 ## Preguntas frecuentes
 

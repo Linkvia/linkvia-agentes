@@ -32,6 +32,6 @@ La lógica del bot (el modelo de IA, los prompts, el catálogo, la base de datos
 | `sendPhoto` / `sendDocument` | acciones `image` y `document` |
 | `sendChatAction("typing")` | `POST /bot/v0/typing`, o la respuesta de a partes con `POST /bot/v0/stream` |
 | `chat.id` y `from.id` | id seudónimo del usuario, distinto para cada negocio |
-| `t.me/tu_bot?start=...` | `https://linkvia.optis.site/@tu_handle?text=...` |
+| `t.me/tu_bot?start=...` | `https://app.linkvia.com.ar/@tu_handle?text=...` |
 
 Los detalles de cada evento y acción están en [conectar-un-bot.md](conectar-un-bot.md). Si querés que una IA te haga la adaptación, pasale [linkvia-para-tu-ia.md](linkvia-para-tu-ia.md) junto con el código de tu bot.
