@@ -14,7 +14,7 @@ Esta guía arma un bot que saluda, muestra botones y pasa a una persona. Despué
 Entrá a [negocios.linkvia.com.ar](https://negocios.linkvia.com.ar/) y completá:
 
 - **Nombre** y **@handle**: el `@handle` es la dirección del chat, por ejemplo `@donluis`.
-- **CUIT** del negocio: es opcional, pero le da al negocio la marca de verificado.
+- **CUIT** del negocio: es opcional. La tilde de verificado la da el equipo de Linkvia después de revisar a mano la constancia de CUIT, la web o un mail del dominio y un contacto; la pedís desde el panel. Sin la tilde el bot anda igual, pero el cliente ve un aviso de negocio sin verificar.
 - **Webhook**: la dirección donde va a escuchar tu bot. Si todavía no la tenés, poné cualquiera y la cambiás en el panel.
 - **Tu bot está hecho para**: dejá **Linkvia**. Si ya tenés un bot para la API de WhatsApp, elegí esa opción y mirá [Traer un bot hecho para WhatsApp](whatsapp.md): anda sin reescribirlo.
 
@@ -62,7 +62,7 @@ En el panel tocá **Probar conexión**. Linkvia le manda un `ping` a tu bot y te
 
 Abrí `https://app.linkvia.com.ar/@tu_handle` desde el celular y escribí "hola". Tu bot contesta con dos botones: **Ver el menú** y **Hablar con alguien**.
 
-Ese mismo link es el que el negocio comparte con sus clientes o pone en un QR, como el wa.me de WhatsApp. Con `?text=` el chat se abre con un texto ya escrito: `https://app.linkvia.com.ar/@donluis?text=Quiero%20hacer%20un%20pedido`.
+Ese mismo link es el que el negocio comparte con sus clientes o pone en un QR, como el wa.me de WhatsApp. Con `?text=` el chat se abre con un texto ya escrito: `https://app.linkvia.com.ar/@donluis?text=Quiero%20hacer%20un%20pedido`. Con `?start=` es un link de campaña (`https://app.linkvia.com.ar/@donluis?start=qr-mesa5`): el panel cuenta cuántos abrieron el chat con cada uno y, si lo activás, tu bot recibe el evento `start` para saludar distinto.
 
 ## Cómo funciona
 
@@ -88,7 +88,9 @@ Tu bot contesta en menos de 10 segundos con las acciones a mostrar:
 
 - `user.id` es un id distinto para cada negocio, no el teléfono. Los datos del cliente (nombre, teléfono, email, dirección) llegan en `user.sharedData` solo si el cliente aceptó compartirlos con tu negocio. Para pedirlos usá la acción `requestConsent`.
 - Cuando el cliente toca un botón, llega un mensaje con `message.choice.id`, el `id` que le pusiste al botón.
-- Además de `message`, pueden llegar `ping`, `consent` y `reaction`. Si no los usás, contestá `"actions": []`.
+- Además de `message`, pueden llegar `ping`, `consent`, `reaction` y, si los activás en el panel, `start` (el cliente abrió el chat con un link de campaña o tocó **Empezar**) y `handback` (una persona del negocio te devuelve la charla). Si no los usás, contestá `"actions": []`.
+- Si tu bot se cae, los mensajes no se pierden: esperan en una cola hasta 24 horas y te llegan cuando vuelve, con `redelivered: true`.
+- Mandá links completos: los acortados (bit.ly, tinyurl.com…) no se aceptan si el negocio no está verificado, y los links peligrosos se bloquean.
 - Cada pedido trae el encabezado `linkvia-signature: t=<unix>,v1=<hex>`, con `v1 = HMAC-SHA256(secreto, "<t>.<cuerpo tal como llegó>")`. Los bots de ejemplo ya lo verifican. No lo saques: sin eso, cualquiera podría hacerse pasar por Linkvia.
 
 ### Lo que tu bot puede mandar
@@ -115,7 +117,7 @@ Un modelo de lenguaje suele tardar más de 10 segundos. En ese caso:
 2. Avisá que estás escribiendo: `POST https://app.linkvia.com.ar/api/bot/v0/typing` con `{"conversationId": "…"}`.
 3. Mandá la respuesta cuando la tengas: `POST https://app.linkvia.com.ar/api/bot/v0/messages` con `{"contractVersion":"0","conversationId":"…","actions":[…]}`.
 
-Las dos llamadas llevan el encabezado `authorization: Bearer lv_…`. También podés mandar la respuesta de a partes, para que el cliente la vea escribirse como en ChatGPT, y pedir el historial de la charla para darle contexto a tu modelo. Está todo en la [guía completa](conectar-un-bot.md#5-agentes-de-ia-contestar-más-tarde-y-de-a-partes).
+Las dos llamadas llevan el encabezado `authorization: Bearer lv_…`. Si el cliente no te escribió en las últimas 24 horas (una promo, un recordatorio), podés mandarle hasta 5 mensajes por día en ese chat. También podés mandar la respuesta de a partes, para que el cliente la vea escribirse como en ChatGPT, y pedir el historial de la charla para darle contexto a tu modelo. Está todo en la [guía completa](conectar-un-bot.md#5-agentes-de-ia-contestar-más-tarde-y-de-a-partes).
 
 ## ¿Lo armás con una IA?
 

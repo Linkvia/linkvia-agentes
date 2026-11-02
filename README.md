@@ -14,7 +14,7 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
 - **Un argumento para vender:** le mostrás a tu cliente cuánto se ahorra frente a WhatsApp.
 - **Sin comisiones** sobre lo que cobrás por tus proyectos.
 - **Todo lo de WhatsApp Business:** botones, listas, carrusel, catálogo, fotos, PDF, ubicación, audios, tildes, "escribiendo…".
-- **Y lo que WhatsApp no tiene:** respuestas que se escriben de a partes (streaming, como ChatGPT), monitoreo cada 5 minutos con aviso si tu bot se cae, y datos del cliente solo con su permiso.
+- **Y lo que WhatsApp no tiene:** respuestas que se escriben de a partes (streaming, como ChatGPT), monitoreo cada 5 minutos con aviso si tu bot se cae (y los mensajes esperan en una cola hasta que vuelve), links de campaña (`?start=`) para saludar distinto según de dónde viene el cliente, y datos del cliente solo con su permiso.
 - **Una persona del negocio puede entrar a la charla:** si tu bot pide ayuda (`handoff`) o el negocio quiere atender en persona, alguien toma la conversación desde el panel, contesta con su nombre y después se la devuelve a tu bot, que recibe el aviso `handback` para ponerse al día.
 - **Si tu bot ya habla con la API de WhatsApp, anda sin reescribirlo:** Linkvia manda el mismo JSON y la misma firma que Meta.
 
@@ -84,7 +84,7 @@ Una conversación empieza cuando el cliente escribe después de 24 horas sin hab
 ## Preguntas frecuentes
 
 **¿Por qué elegir Linkvia en vez de Telegram?**
-Porque los clientes del negocio no tienen que instalar ni pagar nada. En Argentina, para mandar el código de verificación por SMS, Telegram le pide al usuario que pague una semana de Telegram Premium con tarjeta desde Google Play, y muchos abandonan ahí. Y para que el bot atienda desde la cuenta del propio negocio (Telegram Business), el negocio tiene que pagar Telegram Premium todos los meses. En Linkvia el cliente nunca paga, el negocio arranca gratis y los clientes entran desde el link del negocio, el código les llega gratis y la app se usa igual que WhatsApp. Además, cada negocio está verificado, los datos del cliente llegan solo con su permiso y Linkvia avisa si el bot deja de responder. Más detalle y cómo llevar un bot de Telegram en [docs/telegram.md](docs/telegram.md).
+Porque los clientes del negocio no tienen que instalar ni pagar nada. En Argentina, para mandar el código de verificación por SMS, Telegram le pide al usuario que pague una semana de Telegram Premium con tarjeta desde Google Play, y muchos abandonan ahí. Y para que el bot atienda desde la cuenta del propio negocio (Telegram Business), el negocio tiene que pagar Telegram Premium todos los meses. En Linkvia el cliente nunca paga, el negocio arranca gratis y los clientes entran desde el link del negocio, el código les llega gratis y la app se usa igual que WhatsApp. Además, los negocios verificados llevan tilde, los links se revisan contra estafas, los datos del cliente llegan solo con su permiso y Linkvia avisa si el bot deja de responder. Más detalle y cómo llevar un bot de Telegram en [docs/telegram.md](docs/telegram.md).
 
 **¿Tengo que dejar WhatsApp o Telegram?**
 No. El mismo agente puede atender en los tres lados; cambia solo la capa que habla con cada mensajero.
