@@ -123,4 +123,4 @@ Pasale a tu asistente (Claude, ChatGPT, Cursor…) el archivo [linkvia-para-tu-i
 
 ## ¿Dudas?
 
-Escribinos a hello@taskia.site.
+Escribinos por WhatsApp al +54 9 3541 59-2344 (https://wa.me/5493541592344).
