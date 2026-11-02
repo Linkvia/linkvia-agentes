@@ -51,6 +51,12 @@ Linkvia hace `POST` al webhook con un JSON y espera la respuesta en menos de 10 
 
 **Devuelta al bot** (`type: "handback"`): llega cuando una persona del negocio atendió la charla desde el panel (**Atención**) y se la devuelve al bot. Trae la conversación, el usuario y `handback: { agentName, since }`. Mientras atendía la persona, los mensajes del usuario no le llegaron al bot: para ponerse al día, leé el historial (lo que escribió la persona viene con `agentName`). Lo que respondas se muestra en el chat. **Llega solo si lo activás** en el panel ("Avisarle a mi bot cuando le devuelvo una charla") o con `PATCH /business` `{"handbackEvent": true}`. Es de mejor esfuerzo, como `start`.
 
+**Lo que el usuario hace con la charla** (`contact`, `cleared` y `streamStopped`, como el `my_chat_member` de Telegram). **Llegan solo si los activás** en el panel ("Avisarle lo que el cliente hace con la charla") o con `PATCH /business` `{"chatEvents": true}`. Traen solo `user: { id }` (el seudónimo, sin datos personales) y son de mejor esfuerzo: lo que respondas **no** se muestra y, si tu bot falla, no cuenta como caída.
+
+- `contact`: `contact: { status }` con `added` (te agregó a sus chats), `removed` (te sacó), `blocked` (te bloqueó: tus mensajes ya no le llegan) o `unblocked`. Trae `conversation` si ya habían hablado. Con `removed` o `blocked`, dejá de escribirle.
+- `cleared`: vació el chat. Si tu agente guarda memoria de la charla, borrala: el usuario ya no ve esos mensajes.
+- `streamStopped`: tocó **Detener** en una respuesta que escribías de a partes. Trae `stream: { messageId, text }` con el texto con el que quedó. Cortá el modelo para no gastar. Aunque no lo actives, lo que sigas mandando a ese `messageId` se descarta sin error y `POST /bot/v0/stream/<messageId>` devuelve `stopped: true`.
+
 **Prueba de conexión** (`type: "ping"`): llega cuando el negocio toca "Probar conexión" y, además, cada 5 minutos desde el monitoreo de Linkvia. Respondé `{"contractVersion":"0","actions":[]}`. Si el bot falla dos veces seguidas (en pings o mensajes), Linkvia lo marca como caído y le avisa al negocio.
 
 ### Verificar la firma
@@ -95,9 +101,12 @@ La respuesta es `{"contractVersion":"0","actions":[...]}`:
 - `buttons` lleva de 1 a 3 botones de respuesta rápida. `list` abre una lista de hasta 10 opciones en total, agrupadas en `sections`; `button` es lo que dice el botón que la abre. `carousel` lleva de 1 a 10 tarjetas que se deslizan, cada una con `title`, y opcionalmente `description`, `imageUrl` (se baja como las fotos; si falla, la tarjeta va sin foto) y hasta 2 `buttons` o un `link`.
 - `buttons`, `list` y `link` aceptan además `header` (título en negrita) y `footer` (nota gris). Los textos largos se recortan: 24 caracteres los botones y opciones, 72 la descripción de una opción, 60 el header y el footer, 1024 el texto.
 - Cuando el usuario toca un botón o elige una opción, llega un mensaje común con `text` igual al título de la opción, `replyTo` con el mensaje de los botones y `message.choice: { id, title }` con el `id` que le pusiste. Conviene decidir por `choice.id` y no por el texto. Abrir la lista no manda nada.
+- **Menú de atajos** (como los comandos de Telegram, pero sin `/`): el negocio carga de 1 a 10 atajos en el panel (**Tu bot → Menú de atajos**) o con `PUT /business/shortcuts`. En el chat aparece un botón al lado del campo de texto que los muestra con su descripción; tocar uno manda un mensaje común con `text` igual al título y `message.choice: { id, title, kind: "shortcut" }`, sin `replyTo`. Así el bot no aprende nada nuevo: si ya decide por `choice.id`, conviene usar los mismos ids que en sus botones (por ejemplo `menu` o `humano`). Con el formato de WhatsApp llega como `button_reply`.
 - `link` abre `url` (https) en el navegador y `copyCode` copia `code` (hasta 64 caracteres). Ninguno de los dos le avisa al bot.
 - **Links y estafas:** debajo de cada botón o tarjeta con link el usuario ve el dominio real (por ejemplo `mercadopago.com.ar`). Si tu negocio no está verificado, antes de abrir un link le avisamos a dónde lleva, y no se aceptan links acortados (bit.ly, tinyurl.com, t.co…) ni en botones ni en el texto: mandá el link completo. Si escribís por tu cuenta la respuesta es un error 400; en una respuesta al webhook, el usuario ve un aviso en lugar del mensaje. Y si un mensaje pide un código, un PIN, una clave o datos de la tarjeta, el usuario ve debajo "Linkvia nunca te pide tu código ni tu PIN en un chat" y el equipo de Linkvia lo revisa. Los links de todos los negocios se revisan además contra la lista de sitios peligrosos de Google (Web Risk): uno marcado como phishing o virus no llega, igual que un link acortado.
 - Los `id` de las opciones de un mismo mensaje tienen que ser distintos (hasta 200 caracteres).
+- **Cada botón acepta además** `style: "primary"` (verde) o `"danger"` (rojo), `disabled: true` (gris, no se puede tocar, como "Sin stock") y `silent: true`. Los botones de un mensaje `buttons` **se eligen una vez**: después de tocar uno se ven grises y otra elección devuelve error, para evitar el doble pedido. Si editás el mensaje, se pueden volver a elegir.
+- **Botones que no escriben** (`silent: true`, como los `callback` de Telegram): tocarlo no escribe nada en el chat. Tu bot recibe el evento `buttonTap` con `buttonTap: { messageId, id, title }` y puede contestar `{"contractVersion":"0","actions":[],"toast":"Agregado ✓"}`: el `toast` (hasta 200 caracteres) se ve un momento abajo, y las `actions` se muestran en el chat. Lo normal es editar el mensaje del botón (por ejemplo, el carrito con la cantidad nueva). Si tu bot no contesta, el usuario ve "no respondió, probá de nuevo" (no cuenta como caída). Solo en el contrato de Linkvia. El bot de ejemplo lo hace con "carrito".
 
 `requestConsent` le muestra al usuario los datos que se van a compartir y los botones **Compartir** y **No compartir**. Si le falta cargar alguno (por ejemplo la dirección), lo completa ahí mismo y queda guardado en su perfil. Si acepta, el bot recibe enseguida un evento `consent` y, desde ese momento, los datos llegan en `user.sharedData` de cada mensaje.
 
@@ -114,6 +123,20 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/messages \
 ```
 
 Solo funciona en conversaciones del propio negocio, mientras el usuario lo tenga en su lista de contactos y no lo haya bloqueado. Si lo quitó o lo bloqueó, la respuesta es un error 400 y no se te dice cuál de las dos.
+
+**Editar y borrar tus mensajes** (como en Telegram; la API de WhatsApp no lo permite). `POST /bot/v0/messages` devuelve los mensajes con su `id` (también están en el historial). Con ese id, durante 48 horas:
+
+```bash
+# Editar: una acción de texto, botones, lista, link o código. El usuario ve "Editado" y no le llega aviso.
+curl -X PATCH https://app.linkvia.com.ar/api/bot/v0/messages/<id> \
+  -H "authorization: Bearer $LINKVIA_API_KEY" -H 'content-type: application/json' \
+  -d '{"contractVersion":"0","action":{"type":"text","text":"Tu pedido salió 🛵"}}'
+
+# Borrar: queda "Se eliminó este mensaje", sin el contenido.
+curl -X DELETE https://app.linkvia.com.ar/api/bot/v0/messages/<id> -H "authorization: Bearer $LINKVIA_API_KEY"
+```
+
+Sirve para un pedido que cambia de estado en la misma burbuja o un carrito con + y −. Las fotos, archivos, carruseles y respuestas de a partes que se están escribiendo no se editan. Con el SDK: `bot.edit(id, action)` y `bot.delete(id)`.
 
 **Tope a lo que mandás sin que te escriban:** mientras el usuario te haya escrito en las últimas 24 horas no hay tope. Si no (una promo, un recordatorio), por chat podés mandar hasta 5 mensajes por día (cada acción cuenta como un mensaje, y empezar una respuesta de a partes cuenta como uno). Pasado el tope la respuesta es un error 429 y no se manda nada del envío; el día se cuenta en hora UTC. Apenas el usuario te escribe, el tope deja de correr. Contestar tarde algo que el usuario hizo tampoco cuenta: durante 24 horas después de que toca Empezar (`start`), reacciona (`reaction`), contesta un pedido de datos (`consent`), la persona del panel te devuelve la charla (`handback`) o te llega un mensaje que esperaba en la cola (`redelivered`), podés escribirle sin tope. Un envío que se rechaza por otra cosa (por ejemplo, una foto que no se pudo bajar) igual cuenta para el tope.
 
@@ -173,6 +196,7 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/stream/<messageId>/end \
 - Si no llega nada durante 60 segundos, la respuesta se da por terminada con lo que haya, y ya no se le puede sumar texto.
 - Una respuesta puede tener hasta 20.000 caracteres y no puede terminar vacía.
 - Funciona en conversaciones del propio negocio y mientras el usuario lo tenga en sus contactos, igual que `POST /bot/v0/messages`.
+- El usuario puede tocar **Detener** mientras se escribe: la respuesta queda con lo que tenía, lo que sigas mandando se descarta (sin error) y cada `POST /bot/v0/stream/<messageId>` devuelve `"stopped": true`. Con el SDK, `reply.stopped` pasa a `true`: cortá ahí el modelo. Con `chatEvents` llega además el evento `streamStopped`.
 
 ## 6. Panel del negocio
 
@@ -185,6 +209,7 @@ En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con
 | `POST /business/test-connection` | Manda un `ping` firmado y devuelve si el bot respondió y en cuánto |
 | `GET /business/incidents` | Últimas caídas del bot, la más reciente primero |
 | `GET /business/usage` | Conversaciones de este mes y del anterior |
+| `PUT /business/shortcuts` | Reemplaza el menú de atajos del agente: `{"shortcuts":[{"id":"menu","title":"Ver la carta","description":"Pizzas y empanadas"}]}`. De 0 a 10; `title` hasta 24 caracteres (es lo que se manda), `description` hasta 72 y `id` hasta 64 (letras, números, `-`, `_` o `.`; si no viene, se arma con el título). Una lista vacía saca el botón del chat |
 | `GET /business/stats?days=30` | Estadísticas de los últimos días: mensajes por día y por hora, tiempo de respuesta del bot y charlas atendidas por una persona |
 | `GET /business/health` | Últimos éxitos y fallas del bot |
 | `POST /business/rotate-api-key` | Cambia la clave de API y devuelve la nueva (una sola vez). La anterior deja de servir en el momento |
