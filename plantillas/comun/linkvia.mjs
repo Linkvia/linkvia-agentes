@@ -30,7 +30,9 @@ export async function enviar(conversationId, actions) {
       headers: { authorization: `Bearer ${CLAVE_API}`, "content-type": "application/json" },
       body: JSON.stringify({ contractVersion: "0", conversationId, actions }),
     });
-    if (!r.ok) console.warn(`Linkvia respondió ${r.status} al mandar un aviso.`);
+    if (r.status === 429) console.warn("Linkvia respondió 429: llegaste al tope de 5 mensajes por día a un cliente que no te escribió en las últimas 24 horas.");
+    else if (r.status === 400) console.warn("Linkvia respondió 400: revisá el mensaje (por ejemplo, un link acortado) o el cliente quitó o bloqueó al negocio.");
+    else if (!r.ok) console.warn(`Linkvia respondió ${r.status} al mandar un aviso.`);
     return r.ok;
   } catch (e) {
     console.warn("No pude mandar un aviso:", e.message);

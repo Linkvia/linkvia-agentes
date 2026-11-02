@@ -21,7 +21,7 @@ def firma_valida(cuerpo: bytes, encabezado: str) -> bool:
 def responder(evento: dict) -> list:
     """Acá va la lógica de tu agente. Devolvé una lista de acciones."""
     if evento["type"] != "message":
-        return []  # ping, consent, reaction: no hace falta contestar
+        return []  # ping, consent, reaction, start, handback: no hace falta contestar
     texto = evento["message"]["text"].lower()
     eleccion = (evento["message"].get("choice") or {}).get("id")
     if "hola" in texto:

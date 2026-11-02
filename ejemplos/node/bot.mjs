@@ -18,7 +18,7 @@ function firmaValida(cuerpo, encabezado = "") {
 
 // Acá va la lógica de tu agente. Devolvé una lista de acciones.
 function responder(evento) {
-  if (evento.type !== "message") return []; // ping, consent, reaction: no hace falta contestar
+  if (evento.type !== "message") return []; // ping, consent, reaction, start, handback: no hace falta contestar
   const texto = evento.message.text.toLowerCase();
   if (texto.includes("hola")) {
     return [{ type: "buttons", text: "¡Hola! ¿En qué te ayudo?", buttons: [

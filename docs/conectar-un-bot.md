@@ -6,7 +6,7 @@ Si el bot ya está hecho para la API de WhatsApp, no hace falta reescribirlo: ve
 
 ## 1. Registrar el negocio
 
-Desde la app, en **¿Tenés un negocio? Conectá tu agente** (`/#/negocios`), o por API:
+Desde el panel de negocios ([negocios.linkvia.com.ar](https://negocios.linkvia.com.ar/)), o por API:
 
 ```bash
 curl -X POST https://app.linkvia.com.ar/api/businesses -H 'content-type: application/json' -d '{
@@ -33,11 +33,11 @@ Linkvia hace `POST` al webhook con un JSON y espera la respuesta en menos de 10 
 
 **Mensaje del usuario** (`type: "message"`): trae el texto, un id de usuario seudónimo (distinto para cada negocio) y en `user.sharedData` solo los datos que el usuario aceptó compartir: `name`, `phone`, `email` y `address`. El historial de pedidos (`orderHistory`) todavía no se completa. Si el usuario respondió citando un mensaje anterior, `message.replyTo` trae ese mensaje: `{ id, from: "user" | "bot", text }`. Los mensajes que no son texto (catálogo, pedido de datos) llegan resumidos en `text`.
 
-**Fotos:** si el usuario manda una foto, `message.image` trae `{ url, mimeType, width, height }` y `text` es el comentario que escribió con la foto (o `📷 Foto` si no escribió nada). La foto se descarga con un `GET` a `url`, sin clave: el link es largo y al azar, así que funciona como un link privado y no conviene publicarlo. Llega en JPG (a veces PNG, WebP o GIF) y pesa como mucho 2 MB. Un bot que solo lee `text` sigue funcionando.
+**Fotos:** si el usuario manda una foto, `message.image` trae `{ url, mimeType, width, height }` y `text` es el comentario que escribió con la foto (o `📷 Foto` si no escribió nada). La foto se descarga con un `GET` a `url`, sin clave: el link está firmado y vence a las 48 horas, así que funciona como un link privado y no conviene publicarlo. Para bajarla más tarde, pedí un link nuevo con el historial (abajo) o mandá tu clave de API en `Authorization: Bearer` al hacer el `GET` a la misma dirección sin `?exp=…&sig=…`; un usuario o un negocio que no son de esa charla reciben 404. Un link vencido o un pedido sin firma ni clave responde 401: es la señal para pedir uno nuevo. Por eso no guardes la `url` para usarla días después: guardá el archivo o pedí el link cuando lo necesites. Llega en JPG (a veces PNG, WebP o GIF) y pesa como mucho 2 MB. Un bot que solo lee `text` sigue funcionando.
 
 **Archivos:** si el usuario manda un archivo, `message.document` trae `{ url, mimeType, filename }` y `text` es el comentario que escribió (o `📄 nombre.pdf` si no escribió nada). Puede ser PDF, Word (`.doc`, `.docx`), Excel (`.xls`, `.xlsx`), PowerPoint (`.ppt`, `.pptx`), OpenOffice (`.odt`, `.ods`) o texto (`.txt`, `.csv`), de hasta 3 MB. Se descarga igual que las fotos, con un `GET` a `url`.
 
-**Reenviados:** si el usuario reenvía un mensaje de otro chat (por ejemplo, la dirección que le pasó otro negocio), llega con `message.forwarded: true`. El contenido viene igual que un mensaje común. Si reenvía un PDF que le mandó otro negocio, `message.document` trae `{ url, mimeType, filename }` y `text` es `📄 nombre.pdf`.
+**Reenviados:** si el usuario reenvía un mensaje de otro chat (por ejemplo, la dirección que le pasó otro negocio), llega con `message.forwarded: true`. El contenido viene igual que un mensaje común. Si reenvía un PDF que le mandó otro negocio, `message.document` trae `{ url, mimeType, filename }` y `text` es `📄 nombre.pdf`. Un archivo reenviado es una copia para este chat: llega con otro id y otra `url`.
 
 **Ubicación:** si el usuario comparte dónde está (por ejemplo, para el delivery), `message.location` trae `{ latitude, longitude }` y `text` viene `📍 Ubicación`.
 
@@ -47,7 +47,9 @@ Linkvia hace `POST` al webhook con un JSON y espera la respuesta en menos de 10 
 
 **Reacción** (`type: "reaction"`): llega cuando el usuario reacciona con un emoji a un mensaje, tuyo o suyo, como en WhatsApp. Trae la conversación, el usuario y `reaction: { messageId, emoji }`. Si sacó la reacción, `emoji` viene vacío. Un 👍 a tu "¿Te confirmo el pedido?" puede servir como un sí. Es de mejor esfuerzo, como `consent`: lo que respondas se muestra en el chat, y si tu bot falla o no lo conoce, no pasa nada.
 
-**Devuelta al bot** (`type: "handback"`): llega cuando una persona del negocio atendió la charla desde el panel (**Atención**) y se la devuelve al bot. Trae la conversación, el usuario y `handback: { agentName, since }`. Mientras atendía la persona, los mensajes del usuario no le llegaron al bot: para ponerse al día, leé el historial (lo que escribió la persona viene con `agentName`). Lo que respondas se muestra en el chat. **Llega solo si lo activás** en el panel ("Avisarle a mi bot cuando le devuelvo una charla") o con `PATCH /business` `{"handbackEvent": true}`. Es de mejor esfuerzo, como `consent`: si tu bot falla, no cuenta como caída.
+**Empezar y links de campaña** (`type: "start"`): llega cuando el usuario abre el chat con un link de campaña (`/@tu-negocio?start=qr-mesa5`) o toca **Empezar** en el chat vacío, como el `/start` de Telegram. Trae la conversación, el usuario y `start: { payload, firstTime }`: `payload` es lo que vino en `?start=` (letras, números, `-` y `_`, hasta 64; vacío si tocó Empezar) y `firstTime` dice si el usuario no tenía al negocio en sus chats. Sirve para saludar solo y distinto según de dónde vino ("¡Bienvenido a la mesa 5!"). Lo que respondas se muestra en el chat. **Llega solo si lo activás** en el panel ("Que mi bot salude solo") o con `PATCH /business` `{"startEvent": true}`; mientras tanto, el chat vacío no muestra el botón Empezar. Es de mejor esfuerzo, como `consent`: si tu bot falla, no cuenta como caída (queda en el registro de entregas). Los links de campaña se cuentan aunque no lo actives: `GET /business/campaigns` y el panel dicen cuántas personas abrieron el chat con cada uno.
+
+**Devuelta al bot** (`type: "handback"`): llega cuando una persona del negocio atendió la charla desde el panel (**Atención**) y se la devuelve al bot. Trae la conversación, el usuario y `handback: { agentName, since }`. Mientras atendía la persona, los mensajes del usuario no le llegaron al bot: para ponerse al día, leé el historial (lo que escribió la persona viene con `agentName`). Lo que respondas se muestra en el chat. **Llega solo si lo activás** en el panel ("Avisarle a mi bot cuando le devuelvo una charla") o con `PATCH /business` `{"handbackEvent": true}`. Es de mejor esfuerzo, como `start`.
 
 **Prueba de conexión** (`type: "ping"`): llega cuando el negocio toca "Probar conexión" y, además, cada 5 minutos desde el monitoreo de Linkvia. Respondé `{"contractVersion":"0","actions":[]}`. Si el bot falla dos veces seguidas (en pings o mensajes), Linkvia lo marca como caído y le avisa al negocio.
 
@@ -94,6 +96,7 @@ La respuesta es `{"contractVersion":"0","actions":[...]}`:
 - `buttons`, `list` y `link` aceptan además `header` (título en negrita) y `footer` (nota gris). Los textos largos se recortan: 24 caracteres los botones y opciones, 72 la descripción de una opción, 60 el header y el footer, 1024 el texto.
 - Cuando el usuario toca un botón o elige una opción, llega un mensaje común con `text` igual al título de la opción, `replyTo` con el mensaje de los botones y `message.choice: { id, title }` con el `id` que le pusiste. Conviene decidir por `choice.id` y no por el texto. Abrir la lista no manda nada.
 - `link` abre `url` (https) en el navegador y `copyCode` copia `code` (hasta 64 caracteres). Ninguno de los dos le avisa al bot.
+- **Links y estafas:** debajo de cada botón o tarjeta con link el usuario ve el dominio real (por ejemplo `mercadopago.com.ar`). Si tu negocio no está verificado, antes de abrir un link le avisamos a dónde lleva, y no se aceptan links acortados (bit.ly, tinyurl.com, t.co…) ni en botones ni en el texto: mandá el link completo. Si escribís por tu cuenta la respuesta es un error 400; en una respuesta al webhook, el usuario ve un aviso en lugar del mensaje. Y si un mensaje pide un código, un PIN, una clave o datos de la tarjeta, el usuario ve debajo "Linkvia nunca te pide tu código ni tu PIN en un chat" y el equipo de Linkvia lo revisa. Los links de todos los negocios se revisan además contra la lista de sitios peligrosos de Google (Web Risk): uno marcado como phishing o virus no llega, igual que un link acortado.
 - Los `id` de las opciones de un mismo mensaje tienen que ser distintos (hasta 200 caracteres).
 
 `requestConsent` le muestra al usuario los datos que se van a compartir y los botones **Compartir** y **No compartir**. Si le falta cargar alguno (por ejemplo la dirección), lo completa ahí mismo y queda guardado en su perfil. Si acepta, el bot recibe enseguida un evento `consent` y, desde ese momento, los datos llegan en `user.sharedData` de cada mensaje.
@@ -110,7 +113,9 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/messages \
   -d '{"contractVersion":"0","conversationId":"<conversation.id del evento>","actions":[{"type":"text","text":"Tu pedido salió"}]}'
 ```
 
-Solo funciona en conversaciones del propio negocio y mientras el usuario lo tenga en su lista de contactos.
+Solo funciona en conversaciones del propio negocio, mientras el usuario lo tenga en su lista de contactos y no lo haya bloqueado. Si lo quitó o lo bloqueó, la respuesta es un error 400 y no se te dice cuál de las dos.
+
+**Tope a lo que mandás sin que te escriban:** mientras el usuario te haya escrito en las últimas 24 horas no hay tope. Si no (una promo, un recordatorio), por chat podés mandar hasta 5 mensajes por día (cada acción cuenta como un mensaje, y empezar una respuesta de a partes cuenta como uno). Pasado el tope la respuesta es un error 429 y no se manda nada del envío; el día se cuenta en hora UTC. Apenas el usuario te escribe, el tope deja de correr. Contestar tarde algo que el usuario hizo tampoco cuenta: durante 24 horas después de que toca Empezar (`start`), reacciona (`reaction`), contesta un pedido de datos (`consent`), la persona del panel te devuelve la charla (`handback`) o te llega un mensaje que esperaba en la cola (`redelivered`), podés escribirle sin tope. Un envío que se rechaza por otra cosa (por ejemplo, una foto que no se pudo bajar) igual cuenta para el tope.
 
 Mientras prepara una respuesta que tarda, el bot puede avisar que está escribiendo. El usuario ve "escribiendo…" hasta que llega el mensaje o pasan 15 segundos (si tarda más, que vuelva a avisar):
 
@@ -128,11 +133,13 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/read \
   -d '{"conversationId":"<conversation.id del evento>"}'
 ```
 
-Abajo del nombre del negocio, el usuario ve "en línea" mientras el bot responde bien, y "últ. vez hoy a las 14:32" si está caído.
+Arriba de la charla el usuario ve el nombre de tu agente (si le pusiste uno en **Perfil**, por ejemplo "Fatty"; si no, el del negocio) y abajo "en línea" mientras el bot responde bien, o "últ. vez hoy a las 14:32" si está caído.
 
-**Historial:** para que el agente tenga el contexto sin guardarlo, `GET /bot/v0/conversations/<conversation.id>/messages?limit=50` (con la clave de API) devuelve los últimos mensajes de la charla: `{ id, from, sentAt, type, text, url?, replyTo?, agentName? }`. `agentName` viene en lo que escribió una persona del negocio desde el panel. `text` es el texto completo o un resumen ("📷 Foto") si no es texto; `url` es dónde bajar la foto, el audio o el archivo.
+**Historial:** para que el agente tenga el contexto sin guardarlo, `GET /bot/v0/conversations/<conversation.id>/messages?limit=50` (con la clave de API) devuelve los últimos mensajes de la charla: `{ id, from, sentAt, type, text, url?, replyTo?, agentName? }`. `agentName` viene en lo que escribió una persona del negocio desde el panel. `text` es el texto completo o un resumen ("📷 Foto") si no es texto; `url` es dónde bajar la foto, el audio o el archivo (un link nuevo, firmado, que dura 48 horas).
 
 **Reintentos:** si la entrega de un mensaje falla rápido (el bot no está, responde 5xx), Linkvia la reintenta una vez al segundo con el mismo `eventId`: si tu bot ya lo había procesado, ignoralo. Si el bot tardó más de 10 segundos no se reintenta, para no hacer esperar más al usuario. Cada intento queda en `GET /business/deliveries` y en el panel.
+
+**Bot caído:** si el reintento también falla, el mensaje no se pierde: queda en una cola y el usuario ve "no está respondiendo ahora. Tu mensaje le va a llegar apenas vuelva" (una vez por caída). Los mensajes que siga mandando a esa charla van detrás. Cuando el bot vuelve a responder (el monitoreo lo prueba cada 5 minutos, o el usuario escribe de nuevo), Linkvia le entrega la cola en orden, con el mismo `eventId` del primer intento y `redelivered: true`; `message.sentAt` dice cuándo lo escribió el usuario, para que el bot no conteste "buen día" a la noche. Lo que el bot responda llega al chat y al celular. Lo que espera más de 24 horas se descarta y queda en el registro de entregas. Si el bot tardó más de 10 segundos no se encola: puede que lo haya recibido. `GET /business/health` devuelve en `pendingEvents` cuántos mensajes esperan.
 
 ## 5. Agentes de IA: contestar más tarde y de a partes
 
@@ -167,18 +174,18 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/stream/<messageId>/end \
 - Una respuesta puede tener hasta 20.000 caracteres y no puede terminar vacía.
 - Funciona en conversaciones del propio negocio y mientras el usuario lo tenga en sus contactos, igual que `POST /bot/v0/messages`.
 
-
 ## 6. Panel del negocio
 
-En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`:
+En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con la sesión del panel (`lvp_…`) si el dueño entró con su mail:
 
 | Ruta | Qué hace |
 | --- | --- |
 | `GET /business` | Perfil y webhook |
-| `PATCH /business` | Cambia nombre, descripción, webhook o email de alertas |
+| `PATCH /business` | Cambia nombre, nombre del agente (`agentDisplayName`, el que ve el cliente en la charla), descripción, webhook o email de alertas |
 | `POST /business/test-connection` | Manda un `ping` firmado y devuelve si el bot respondió y en cuánto |
 | `GET /business/incidents` | Últimas caídas del bot, la más reciente primero |
 | `GET /business/usage` | Conversaciones de este mes y del anterior |
+| `GET /business/stats?days=30` | Estadísticas de los últimos días: mensajes por día y por hora, tiempo de respuesta del bot y charlas atendidas por una persona |
 | `GET /business/health` | Últimos éxitos y fallas del bot |
 | `POST /business/rotate-api-key` | Cambia la clave de API y devuelve la nueva (una sola vez). La anterior deja de servir en el momento |
 | `POST /business/rotate-webhook-secret` | Cambia el secreto del webhook y devuelve el nuevo. Los eventos siguientes se firman con él |
@@ -189,6 +196,13 @@ En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`:
 | `POST /business/conversations/<id>/messages` | Contesta como persona: `{"agentName","text"}`, o con `image` o `document`. Si no la había tomado, la toma |
 | `POST /business/conversations/<id>/release` | Se la devuelve al bot (con `handbackEvent`, el bot recibe `handback`) |
 | `GET /business/events` | Avisos en el momento de qué charla cambió (Server-Sent Events), para la bandeja |
+| `POST /business/owner` | Agrega o cambia el mail del dueño: `{"email","code"}` con el código que le llegó a ese mail. Las sesiones abiertas con el mail anterior dejan de servir |
+| `DELETE /business/session` | Cierra la sesión del panel abierta con el mail |
+| `POST /business/verification` | Pide la tilde de verificado. Hace falta el mail del dueño: por ahí te escribimos |
+
+**Entrar con el mail del dueño** (sin clave): `POST /business/owner/code` con `{"email","purpose":"ingresar"}` manda un código de 6 números al mail (solo si es dueño de algún negocio; la respuesta es igual en los dos casos). Después, `POST /business/login` con `{"email","code"}` devuelve `{ businesses: [{ handle, name, token }] }`: un token de sesión por cada negocio de ese mail, que dura 30 días. Para el alta o para agregar el dueño, el código se pide con `"purpose":"verificar"` y se manda en `POST /businesses` (`ownerEmail`, `ownerCode`) o en `POST /business/owner`. Cuando cambian la clave de API, el secreto o el webhook, Linkvia le avisa al dueño por mail.
+
+**La tilde de verificado** la da solo el equipo de Linkvia, después de revisar a mano la constancia de CUIT de ARCA, tu web o un mail de tu dominio, y un contacto. Un CUIT válido no alcanza (`verification: "light"`): solo `"strong"` muestra la tilde. Sin la tilde tu bot funciona igual, pero el usuario ve un aviso de negocio sin verificar y no aparecés en el directorio. Si un negocio verificado cambia el nombre, pierde la tilde hasta que lo revisemos de nuevo. Los nombres y @ de bancos, billeteras y organismos (por ejemplo `banco`, `mercadopago`, `uala`, `anses`) no se pueden usar sin verificación, y un nombre parecido al de un negocio verificado queda en revisión.
 
 ## 7. Link a tu chat
 

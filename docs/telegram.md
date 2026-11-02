@@ -10,7 +10,7 @@ Telegram tiene la mejor API de bots que existe y es gratis. Si ya hiciste un bot
 - **Atender desde la cuenta del negocio también se paga.** La API de bots de Telegram es gratis, pero para conectar un bot a la cuenta del propio negocio (Telegram Business, con horario, bienvenida y respuestas rápidas) hay que pagar Telegram Premium, unos 5 USD por mes. En Linkvia el negocio arranca gratis y el cliente nunca paga.
 - **Se usa igual que WhatsApp.** Es la app que usa casi todo el mundo en Argentina, así que no hay nada que aprender. Telegram tiene otra interfaz y, para muchos clientes, es "otra app más".
 - **Es un lugar solo para negocios.** No hay grupos, canales ni mensajes de desconocidos. El cliente tiene ahí los negocios con los que habla, como contactos.
-- **Confianza y datos personales.** Cada negocio se verifica con su CUIT y su `@handle` queda protegido. El bot recibe un id distinto para cada negocio, así que la pizzería no puede cruzar datos con la heladería. Los datos del cliente (nombre, teléfono, dirección) llegan solo con su permiso, dato por dato, como pide la Ley 25.326. En Telegram el bot recibe un id que es el mismo para todos los bots, y el consentimiento lo resuelve cada uno.
+- **Confianza y datos personales.** Los negocios verificados (el equipo de Linkvia revisa a mano su CUIT y un contacto) llevan tilde, los nombres de bancos y billeteras no se pueden usar sin verificación y los links se revisan contra estafas. El bot recibe un id distinto para cada negocio, así que la pizzería no puede cruzar datos con la heladería. Los datos del cliente (nombre, teléfono, dirección) llegan solo con su permiso, dato por dato, como pide la Ley 25.326. En Telegram el bot recibe un id que es el mismo para todos los bots, y el consentimiento lo resuelve cada uno.
 - **Servicio al negocio.** Linkvia vigila el bot cada 5 minutos y avisa si deja de responder. El negocio tiene un panel con las conversaciones del mes y soporte en español.
 
 ## Lo que Telegram hace mejor (por ahora)
@@ -32,6 +32,6 @@ La lógica del bot (el modelo de IA, los prompts, el catálogo, la base de datos
 | `sendPhoto` / `sendDocument` | acciones `image` y `document` |
 | `sendChatAction("typing")` | `POST /bot/v0/typing`, o la respuesta de a partes con `POST /bot/v0/stream` |
 | `chat.id` y `from.id` | id seudónimo del usuario, distinto para cada negocio |
-| `t.me/tu_bot?start=...` | `https://app.linkvia.com.ar/@tu_handle?text=...` |
+| `t.me/tu_bot?start=...` y el comando `/start` | `https://app.linkvia.com.ar/@tu_handle?start=...` y el evento `start` (se activa en el panel); con `?text=` el chat se abre con un texto ya escrito |
 
 Los detalles de cada evento y acción están en [conectar-un-bot.md](conectar-un-bot.md). Si querés que una IA te haga la adaptación, pasale [linkvia-para-tu-ia.md](linkvia-para-tu-ia.md) junto con el código de tu bot.
