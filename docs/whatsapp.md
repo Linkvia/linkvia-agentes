@@ -23,7 +23,7 @@ El mismo sobre que manda Meta: `object: "whatsapp_business_account"` → `entry[
 
 - `wa_id` y `from` no son el teléfono del usuario: son el id de la conversación, distinto para cada negocio. Se usan igual, como `to` al contestar.
 - `contacts[].profile.name` trae el nombre solo si el usuario aceptó compartirlo con el negocio; si no, viene vacío.
-- Tipos: `text`, `image`, `audio` (`voice: true`), `document`, `location`, `interactive` (`button_reply` o `list_reply` cuando el usuario toca un botón o elige de una lista) y `reaction`. Las citas y los reenvíos van en `context`.
+- Tipos: `text`, `image`, `audio` (`voice: true`), `document`, `location`, `interactive` (`button_reply` o `list_reply` cuando el usuario toca un botón o elige de una lista; un atajo del menú del agente también llega como `button_reply`, sin `context`) y `reaction`. Las citas y los reenvíos van en `context`.
 - Fotos, audios y archivos traen un `id`: con `GET /api/wa/v21.0/{id}` (y la clave de API) se pide su `url` y después se baja con un `GET` a esa `url`. La `url` está firmada y vence a las 48 horas (como la de WhatsApp, que vence a los 5 minutos): si venció, se pide de nuevo. También se baja mandando la clave de API en `Authorization: Bearer`, como hacen los bots de WhatsApp, aunque el link haya vencido. Sin clave, un link vencido responde 401.
 - Lo que no tiene equivalente en WhatsApp no se manda, como la respuesta a un pedido de datos del contrato de Linkvia.
 
