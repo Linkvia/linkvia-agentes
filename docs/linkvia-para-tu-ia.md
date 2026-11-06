@@ -33,6 +33,9 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`; `r
 
 - `user.id`: id seudónimo, distinto para cada negocio. No es el teléfono.
 - `user.sharedData`: solo los datos que el cliente aceptó compartir: `name`, `phone`, `email`, `address`.
+- `user.guest: true`: escribe desde el widget de la web del negocio sin cuenta. `sharedData` vacío; no puede compartir datos, mandar archivos ni ubicación, ni aceptar avisos. Si después entra con su celular, sigue el mismo `conversation.id` pero cambia `user.id`: guardar el estado por `conversation.id`.
+- `user.membership` (solo agentes privados): cómo entró, `{ via: "link", link }` o `{ via: "list", link, reference }`.
+- `user.adsOptOut: true`: pidió no ver publicidad de este agente. `user.consents.sensitive: { type, acceptedAt }`: aceptó que el agente use datos sensibles declarados por el negocio.
 
 ### `type: "message"`
 
@@ -49,8 +52,8 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`; `r
 `message` puede traer además:
 - `choice: { id, title, kind }`: el cliente tocó un botón u opción. Decidir por `choice.id`.
 - `replyTo: { id, from: "user" | "bot", text }`: citó un mensaje.
-- `image: { url, mimeType, width, height }`, `audio: { url, mimeType, durationMs }`, `document: { url, mimeType, filename }`: se bajan con `GET url` sin clave (el link está firmado y vence a las 48 horas; después, `GET` a la misma dirección sin `?exp=…&sig=…` con `authorization: Bearer <LINKVIA_API_KEY>`, o un link nuevo desde el historial; un link vencido responde 401). En ese caso `text` es el comentario o un resumen ("📷 Foto", "🎤 Mensaje de voz", "📄 nombre.pdf").
-- `location: { latitude, longitude }` (`text` = "📍 Ubicación").
+- `image: { url, mimeType, width, height }`, `audio: { url, mimeType, durationMs }`, `video: { url, mimeType, width, height, durationMs }` (MP4, WebM o MOV, hasta 16 MB), `document: { url, mimeType, filename }` (PDF, Word, Excel, PowerPoint, OpenOffice, TXT o CSV, hasta 3 MB): se bajan con `GET url` sin clave (el link está firmado y vence a las 48 horas; después, `GET` a la misma dirección sin `?exp=…&sig=…` con `authorization: Bearer <LINKVIA_API_KEY>`, o un link nuevo desde el historial; un link vencido responde 401). En ese caso `text` es el comentario o un resumen ("📷 Foto", "🎤 Mensaje de voz", "🎥 Video", "📄 nombre.pdf"). En el plan Free los archivos se borran a los 90 días: si hacen falta, bajarlos al llegar.
+- `location: { latitude, longitude }` (`text` = "📍 Ubicación"); si responde a un `requestLocation`, trae `replyTo` con el pedido.
 - `forwarded: true`: lo reenvió de otro chat.
 
 ### Los otros eventos
@@ -61,7 +64,13 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`; `r
 - `start`: el cliente abrió el chat con un link de campaña (`/@<handle>?start=qr-mesa5`) o tocó **Empezar** en el chat vacío, como el `/start` de Telegram. Trae `start: { payload, firstTime }`: `payload` es lo que vino en `?start=` (letras, números, `-` y `_`, hasta 64; vacío si tocó Empezar) y `firstTime` dice si no tenía al negocio en sus chats. Sirve para saludar solo. Llega solo si el negocio lo activó (`PATCH /business` `{"startEvent": true}`).
 - `handback`: una persona del negocio atendió la charla desde el panel y se la devolvió al bot. Trae `handback: { agentName, since }`. Mientras tanto el bot no recibió los mensajes: leer el historial para ponerse al día. Llega solo si el negocio lo activó (`PATCH /business` `{"handbackEvent": true}`).
 
-`consent`, `reaction`, `start` y `handback` son de mejor esfuerzo: si el bot falla o no los conoce, no cuenta como caída. Un bot que no los usa puede responder `actions: []`.
+- `buttonTap`: el cliente tocó un botón con `silent: true` (no escribe nada en el chat). Trae `buttonTap: { messageId, id, title }`. Responder `{"contractVersion":"0","actions":[],"toast":"Agregado ✓"}` (el `toast` se ve un momento) y, si hace falta, editar el mensaje del botón.
+- `notice`: el cliente aceptó, rechazó o canceló un aviso ofrecido con la acción `notice`. Trae `notice: { id, title, status: "accepted" | "declined" | "cancelled", expiresAt? }`.
+- `status`: tildes para el bot, como los `statuses` de WhatsApp. Trae `status: { messageIds, status: "delivered" | "read", at }`. Llega solo si el negocio lo activó (`PATCH /business` `{"statusEvents": true}`).
+- `contact` (`contact: { status: "added" | "removed" | "blocked" | "unblocked" }`), `cleared` (vació el chat: borrar la memoria de la charla) y `streamStopped` (tocó **Detener** en una respuesta de a partes; trae `stream: { messageId, text }`: cortar el modelo). Llegan solo si el negocio lo activó (`PATCH /business` `{"chatEvents": true}`).
+- `dataDeletion`: el cliente borró sus datos con el agente. Trae `user: { id }` y `conversations` (ids borradas). **Borrar todo lo guardado de ese `user.id`** (Ley 25.326). Llega siempre.
+
+`consent`, `reaction`, `start`, `handback`, `buttonTap`, `notice`, `status`, `contact`, `cleared`, `streamStopped` y `dataDeletion` son de mejor esfuerzo: si el bot falla o no los conoce, no cuenta como caída. Un bot que no los usa puede responder `actions: []`. En `status`, `contact`, `cleared`, `streamStopped` y `dataDeletion` lo que se responda no se muestra.
 
 ## Respuesta del webhook
 
@@ -73,18 +82,24 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`; `r
 
 | `type` | Campos |
 |---|---|
-| `text` | `text` (formato WhatsApp: `*negrita*`, `_cursiva_`, `~tachado~`, ```` ``` ````) |
-| `buttons` | `text`, `buttons: [{ id, title }]` (1 a 3), opcional `header`, `footer` |
+| `text` | `text` (formato WhatsApp: `*negrita*`, `_cursiva_`, `~tachado~`, ```` ``` ````; también el Markdown de los modelos de IA: `**negrita**`, títulos, listas, tablas simples, `[texto](https://…)`; sin HTML) |
+| `buttons` | `text`, `buttons: [{ id, title, style?: "primary" \| "danger", disabled?, silent? }]` (1 a 3), opcional `header`, `footer`. Se eligen una sola vez |
 | `list` | `text`, `button` (lo que dice el botón que la abre), `sections: [{ title?, rows: [{ id, title, description? }] }]` (hasta 10 filas en total), opcional `header`, `footer` |
 | `carousel` | `text?`, `cards: [{ title, description?, imageUrl?, buttons?: [{ id, title }] (hasta 2) o link?: { label, url } }]` (1 a 10) |
 | `catalog` | `items: [{ id, title, description?, priceCents?, currency?, imageUrl? }]` (`priceCents` en centavos) |
 | `image` | `url` (https, JPG/PNG/WebP/GIF, hasta 4 MB), `caption?` |
-| `document` | `url` (https, PDF, hasta 4 MB), `filename`, `caption?` |
-| `location` | `latitude`, `longitude`, `name?`, `address?` |
+| `document` | `url` (https, PDF, Word, Excel, PowerPoint, OpenOffice, TXT o CSV, hasta 4 MB), `filename` (de su extensión sale el tipo), `caption?` |
+| `audio` | `url` (https, OGG/Opus, MP3, M4A o WebM, hasta 4 MB), `durationMs?`. Se ve como mensaje de voz |
+| `video` | `url` (https, MP4, WebM o MOV, hasta 16 MB), `caption?` |
+| `location` | `latitude`, `longitude`, `name?`, `address?`, `live?` (minutos, 1 a 480: ubicación en tiempo real; se mueve editando el mensaje con `PATCH /bot/v0/messages/{id}`) |
+| `requestLocation` | `text`: muestra el botón **Mandar mi ubicación** |
+| `notice` | `id`, `title`, `text`, `days`: ofrece un aviso con permiso ("¿Te aviso cuando salga tu pedido?") |
 | `link` | `text`, `label`, `url` (https), opcional `header`, `footer` |
 | `copyCode` | `text`, `code` (hasta 64 caracteres) |
 | `requestConsent` | `dataTypes: ["name" \| "phone" \| "email" \| "address"]`, `purpose` (para qué, en palabras del cliente) |
 | `handoff` | `reason?`: pasa la charla a una persona del negocio. Aparece arriba en la bandeja **Atención** del panel; mientras una persona la atiende, el bot no recibe los mensajes del cliente |
+
+Cualquier acción puede llevar `sponsored: { by: "Anunciante" }` si es publicidad (se ve marcada; tope 1 por persona, agente y semana). Mandar publicidad sin marcar va contra las reglas.
 
 Límites: 24 caracteres en títulos de botones y opciones, 72 en descripciones de opciones, 60 en `header` y `footer`, 1024 en `text`. Los `id` de un mismo mensaje tienen que ser distintos.
 
@@ -97,11 +112,14 @@ Base `https://app.linkvia.com.ar/api`, encabezados `authorization: Bearer <LINKV
 | Método y ruta | Cuerpo | Para qué |
 |---|---|---|
 | `POST /bot/v0/messages` | `{ contractVersion: "0", conversationId, actions: [...] }` | Mandar un mensaje después (respuesta de IA, aviso de pedido) |
+| `POST /bot/v0/messages` con `notice: "<id>"` | `{ contractVersion: "0", conversationId, notice, actions: [...] }` | Mandar un aviso que el cliente aceptó. No cuenta para el tope |
+| `PATCH /bot/v0/messages/{id}` | `{ contractVersion: "0", action: {...} }` | Editar un mensaje del bot (texto, botones, lista, link, código o ubicación en tiempo real). El cliente ve "Editado" |
+| `DELETE /bot/v0/messages/{id}` | | Borrar un mensaje del bot: queda "Se eliminó este mensaje" |
 | `POST /bot/v0/typing` | `{ conversationId }` | Mostrar "escribiendo…" durante 15 segundos |
 | `POST /bot/v0/read` | `{ conversationId }` | Marcar la charla como leída (tildes azules) |
 | `GET /bot/v0/conversations/{id}/messages?limit=50` | | Historial: `[{ id, from, sentAt, type, text, url?, replyTo?, agentName? }]` (`agentName` = lo escribió una persona del negocio; `url` es un link nuevo que dura 48 horas) |
 | `POST /bot/v0/stream` | `{ conversationId }` | Empezar una respuesta de a partes. Devuelve `{ messageId }` |
-| `POST /bot/v0/stream/{messageId}` | `{ text }` | Sumar texto al final (mandar cada 100 a 300 ms, no por token) |
+| `POST /bot/v0/stream/{messageId}` | `{ text }` | Sumar texto al final (mandar cada 100 a 300 ms, no por token). Si responde `stopped: true`, el cliente tocó Detener: cortar el modelo |
 | `POST /bot/v0/stream/{messageId}/end` | `{}` o `{ text }` | Terminarla. Con `text`, ese reemplaza todo. Sin nada en 60 s se cierra sola |
 
 ## Patrón para agentes de IA que tardan más de 10 segundos
