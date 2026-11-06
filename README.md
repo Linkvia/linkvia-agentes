@@ -47,11 +47,13 @@ La guía paso a paso está en **[docs/empezar-en-5-minutos.md](docs/empezar-en-5
 | [docs/linkvia-para-tu-ia.md](docs/linkvia-para-tu-ia.md) | El contrato resumido para pasarle a Claude, ChatGPT o Cursor y que te escriba el bot |
 | [ejemplos/node/bot.mjs](ejemplos/node/bot.mjs) | Bot mínimo en Node 18+, sin dependencias |
 | [ejemplos/python/bot.py](ejemplos/python/bot.py) | Bot mínimo en Python 3.9+, sin dependencias |
+| [sdks/python/](sdks/python/) | SDK para Python: verifica la firma, contesta, escribe después, edita y manda respuestas de a partes |
+| [sdks/n8n/](sdks/n8n/) | Nodos para n8n: un trigger con la firma verificada y un nodo para contestar (en prueba) |
 | [plantillas/](plantillas/) | **Agentes listos para vender** a negocios: turnos de belleza, gastronomía con delivery y take away, canchas y clases. Con panel, seña y cobro |
 | [casos/](casos/) | **Ideas de agentes de consumo** con cómo cobrarlos: vencimientos, gastos, inglés, lista de compras y más |
 | [docs/cobrar-con-mercado-pago.md](docs/cobrar-con-mercado-pago.md) | Cómo cobra tu agente con la cuenta de Mercado Pago del negocio |
 
-Próximamente: plantillas para n8n, Make y Botpress, y un ejemplo con un modelo de IA.
+Próximamente: plantillas para Make y Botpress, y un ejemplo con un modelo de IA.
 
 ## Vendé tu agente
 

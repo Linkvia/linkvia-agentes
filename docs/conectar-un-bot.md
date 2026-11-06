@@ -101,7 +101,7 @@ if (!verifySignature(process.env.LINKVIA_WEBHOOK_SECRET!, rawBody, req.headers[S
 
 En otro lenguaje alcanza con calcular el mismo HMAC sobre el cuerpo **tal como llegó**, antes de parsearlo.
 
-**En Python o en n8n:** estamos preparando un SDK para Python (verifica la firma, contesta, `send`, `edit`, `typing`, `stream`…) y nodos para n8n. Todavía no están publicados; mientras tanto, [bot.py](../ejemplos/python/bot.py) muestra cómo verificar la firma y contestar sin dependencias.
+**En Python o en n8n** hay SDK y nodos listos, sin dependencias: [sdks/python](../sdks/python) (`LinkviaBot`: verifica la firma, contesta, `send`, `edit`, `typing`, `stream`…) y [sdks/n8n](../sdks/n8n) (un trigger que verifica la firma y un nodo para escribir; en prueba). Cómo instalarlos, en el README de cada uno. Todavía no están en PyPI ni en npm.
 
 ## 3. Responder
 
