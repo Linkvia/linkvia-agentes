@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linkvia"
+version = "0.1.0"
+description = "Para conectar el bot o agente de un negocio a Linkvia: recibir mensajes, contestar y escribir de a partes."
+readme = "README.md"
+requires-python = ">=3.9"
+# Sin dependencias: solo la biblioteca estándar de Python.
+dependencies = []
+
+[tool.setuptools]
+packages = ["linkvia"]

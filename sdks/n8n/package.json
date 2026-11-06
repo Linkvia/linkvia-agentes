@@ -1,0 +1,16 @@
+{
+  "name": "n8n-nodes-linkvia",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nodos de n8n para conectar un agente a Linkvia: recibir los mensajes (con la firma verificada) y contestar.",
+  "keywords": ["n8n-community-node-package", "linkvia"],
+  "license": "MIT",
+  "homepage": "https://negocios.linkvia.com.ar/#/desarrolladores",
+  "main": "index.js",
+  "files": ["credentials", "nodes", "lib", "index.js"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": ["credentials/LinkviaApi.credentials.js"],
+    "nodes": ["nodes/Linkvia/Linkvia.node.js", "nodes/LinkviaTrigger/LinkviaTrigger.node.js"]
+  }
+}
