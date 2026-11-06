@@ -1,6 +1,6 @@
 # Widget de Linkvia para tu web
 
-Con una línea de código, tu web tiene un botón de chat con tu agente, como el botón de WhatsApp. La persona toca el botón, entra con su celular y chatea con tu agente. La charla es la misma que en la app de Linkvia: si después abre la app, sigue ahí, y tu negocio queda en su lista de chats.
+Con una línea de código, tu web tiene un botón de chat con tu agente, como el botón de WhatsApp. La persona toca el botón, entra con su celular (o, si lo prendés, chatea sin cuenta) y habla con tu agente. La charla es la misma que en la app de Linkvia: si después abre la app, sigue ahí, y tu negocio queda en su lista de chats.
 
 ## Ponerlo en tu web
 
@@ -37,7 +37,16 @@ El widget está hecho para no tocar la velocidad de tu sitio ni tu puntaje de Pa
 <script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-mode="inline" data-target="#linkvia-chat" async></script>
 ```
 
-Muestra un recuadro con tu ícono y un botón "Abrir el chat"; el chat se carga al tocarlo. Si querés que se cargue solo cuando el recuadro aparece en pantalla, sumá `data-load="visible"`. Sin `data-target`, el chat va justo donde está el `<script>`.
+Antes de que la persona lo toque, el recuadro muestra una **charla de muestra** que se va escribiendo sola, en loop: la persona tipea, el agente aparece "escribiendo…" y contesta. Así se entiende de un vistazo para qué sirve. Al tocarlo se carga el chat de verdad. Las frases las elegís con `data-demo`, separadas por `|` y turnándose (la persona, tu agente, la persona…; hasta 6 frases de 140 letras):
+
+```html
+<script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-mode="inline" data-target="#linkvia-chat"
+  data-demo="Hola, ¿tienen delivery?|¡Hola! Sí, hasta las 23 h. ¿Qué te gustaría pedir?" async></script>
+```
+
+Sin `data-demo` usamos unas frases que sirven para cualquier rubro. La muestra no pide nada a la red, se mueve solo mientras está en pantalla y, si la persona tiene activado "reducir movimiento", se ve quieta con todas las frases.
+
+¿Preferís otra cosa? Con `data-load="click"` se ve un recuadro con tu ícono y un botón "Abrir el chat". Con `data-load="visible"` no hay nada antes: el chat se carga solo cuando el recuadro aparece en pantalla. Sin `data-target`, el chat va justo donde está el `<script>`.
 
 ## Opciones
 
@@ -50,7 +59,8 @@ Todas son atributos `data-` del `<script>`. Solo `data-handle` es obligatorio.
 | `data-start` | Nombre de campaña, para ver en el panel cuántos chats vinieron de la web | `web-home` |
 | `data-mode` | `bubble` (globito, por defecto) o `inline` (dentro de la página) | `inline` |
 | `data-target` | En `inline`: dónde va el chat (selector CSS) | `#linkvia-chat` |
-| `data-load` | En `inline`: `click` (por defecto) o `visible` | `visible` |
+| `data-load` | En `inline`, qué se ve antes del chat: `demo` (charla de muestra, por defecto), `click` (botón) o `visible` (el chat ya cargado) | `click` |
+| `data-demo` | En `inline` con `demo`: las frases de la muestra, separadas por `\|` | `Hola\|¡Hola! ¿En qué te ayudo?` |
 | `data-preset` | Estilo listo: `linkvia` (por defecto) o `whatsapp` (ícono de teléfono, verde `#25D366`) | `whatsapp` |
 | `data-color` | Color del botón: `#rrggbb`, `rgb(...)`, `hsl(...)` o un nombre | `#ff6b4a` |
 | `data-icon-color` | Color del ícono (blanco por defecto) | `#111b21` |
@@ -79,8 +89,24 @@ Para que un botón o un link tuyo ("Escribinos") abra el chat, mandá un evento.
 
 También están `linkvia:close` y `linkvia:toggle`. Si tenés más de un widget en la misma página, indicá cuál: `new CustomEvent('linkvia:open', { detail: { handle: 'pizzeria' } })`. Con el teclado, `Esc` cierra el chat.
 
+## Chatear sin cuenta (invitados)
+
+Viene prendido: la gente te puede escribir desde tu web sin entrar con el celular. Si preferís que siempre entren con su celular, apagalo en el panel: **Compartir → Chatear sin cuenta desde tu web**.
+
+Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta** (marca que tiene 18 años o más y acepta los Términos) o **Entrar con mi celular**.
+
+- Como invitado puede escribir, tocar botones y usar el menú de atajos, y la atiende tu bot o alguien de tu equipo desde Atención.
+- No puede mandar fotos, audios, archivos ni ubicación, ni compartir datos (no hay teléfono ni perfil), ni aceptar avisos. Si tu bot le pide datos, le aparece "Para compartir tus datos, entrá con tu celular".
+- Queda guardado solo en ese navegador y solo para tu negocio: no sirve para hablar con otros agentes.
+- Si después entra con su celular desde el widget, la charla pasa a su cuenta y tu negocio queda en su lista de chats. Si ya tenía un chat con vos, sigue en ese.
+- En Atención aparece como "Invitado" con un código corto. Tu bot lo recibe con `user.guest: true` (ver [Conectar el bot de un negocio](conectar-un-bot.md)).
+- Cada charla cuenta para tu plan igual que en la app. Hay topes para que nadie lo use para molestarte: invitados nuevos por hora desde una misma conexión y por día en tu negocio, y mensajes por minuto y por día de cada invitado.
+- Un invitado que no vuelve en 90 días se borra con su charla.
+- Los agentes privados nunca aceptan invitados.
+
 ## Privacidad
 
 - El iframe se abre sin decirle a Linkvia desde qué página vino (`no-referrer`).
 - Tu web no ve nada de la charla ni de la persona: el chat vive en el dominio de Linkvia y el navegador lo separa de tu página. Tu agente recibe lo mismo que en la app: el seudónimo y solo los datos que la persona aceptó compartir.
 - Solo la vista del chat (`/@negocio?embed=1`) se puede mostrar dentro de otra web; el resto de la app y el panel, no.
+- Si tu agente es privado (panel → **Acceso**), el widget abre el chat solo para quien ya es miembro: a los demás les llega el link de invitación, no el widget.

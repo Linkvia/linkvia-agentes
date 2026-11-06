@@ -13,8 +13,9 @@ Desde octubre de 2026, Meta cobra cada respuesta de un bot de WhatsApp después 
 
 - **Un argumento para vender:** le mostrás a tu cliente cuánto se ahorra frente a WhatsApp.
 - **Sin comisiones** sobre lo que cobrás por tus proyectos.
-- **Todo lo de WhatsApp Business:** botones, listas, carrusel, catálogo, fotos, PDF, ubicación, audios, tildes, "escribiendo…".
-- **Y lo que WhatsApp no tiene:** respuestas que se escriben de a partes (streaming, como ChatGPT), monitoreo cada 5 minutos con aviso si tu bot se cae (y los mensajes esperan en una cola hasta que vuelve), links de campaña (`?start=`) para saludar distinto según de dónde viene el cliente, y datos del cliente solo con su permiso.
+- **Todo lo de WhatsApp Business:** botones, listas, carrusel, catálogo, fotos, videos, audios, PDF, Word y Excel, ubicación (también en tiempo real, para el repartidor en camino), tildes de llegó y leído para tu bot, "escribiendo…".
+- **Y lo que WhatsApp no tiene:** respuestas que se escriben de a partes (streaming, como ChatGPT), monitoreo cada 5 minutos con aviso si tu bot se cae (y los mensajes esperan en una cola hasta que vuelve), links de campaña (`?start=`) para saludar distinto según de dónde viene el cliente, datos del cliente solo con su permiso, **avisos con permiso** ("¿Te aviso cuando salga tu pedido?") que no cuentan para el tope, botones que no escriben en el chat, mensajes que tu bot edita o borra, y el Markdown que escriben los modelos de IA, que se ve bien sin convertirlo.
+- **Chat desde la web del negocio, sin cuenta:** con el [widget](docs/widget.md), la gente le escribe a tu agente desde la web del negocio sin registrarse; si después entra con su celular, la charla sigue.
 - **Una persona del negocio puede entrar a la charla:** si tu bot pide ayuda (`handoff`) o el negocio quiere atender en persona, alguien toma la conversación desde el panel, contesta con su nombre y después se la devuelve a tu bot, que recibe el aviso `handback` para ponerse al día.
 - **Si tu bot ya habla con la API de WhatsApp, anda sin reescribirlo:** Linkvia manda el mismo JSON y la misma firma que Meta.
 
