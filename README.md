@@ -41,6 +41,7 @@ La guía paso a paso está en **[docs/empezar-en-5-minutos.md](docs/empezar-en-5
 | [docs/empezar-en-5-minutos.md](docs/empezar-en-5-minutos.md) | Guía corta, de cero a tu agente contestando |
 | [docs/conectar-un-bot.md](docs/conectar-un-bot.md) | Referencia completa: eventos, acciones, firma, API, modo asíncrono para IA, streaming |
 | [docs/whatsapp.md](docs/whatsapp.md) | Traer un bot hecho para la API de WhatsApp sin reescribirlo |
+| [docs/widget.md](docs/widget.md) | Poner el chat con tu agente en la web del negocio: globito o embebido, con una línea |
 | [docs/telegram.md](docs/telegram.md) | Linkvia frente a Telegram, y cómo llevar un bot de Telegram |
 | [docs/linkvia-para-tu-ia.md](docs/linkvia-para-tu-ia.md) | El contrato resumido para pasarle a Claude, ChatGPT o Cursor y que te escriba el bot |
 | [ejemplos/node/bot.mjs](ejemplos/node/bot.mjs) | Bot mínimo en Node 18+, sin dependencias |
