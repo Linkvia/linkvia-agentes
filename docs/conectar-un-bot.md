@@ -353,6 +353,9 @@ En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con
 | `POST /business/conversations/<id>/take` | Una persona toma la charla: `{"agentName":"Laura"}`. El bot deja de recibir los mensajes |
 | `POST /business/conversations/<id>/messages` | Contesta como persona: `{"agentName","text"}`, o con `image` o `document`. Si no la había tomado, la toma |
 | `POST /business/conversations/<id>/release` | Se la devuelve al bot (con `handbackEvent`, el bot recibe `handback`) |
+| `POST /business/conversations/<id>/notes` | Nota interna `{"agentName","text"}`: solo la ve el equipo (`notes` en la charla), nunca el usuario ni el bot |
+| `POST /business/conversations/<id>/summary` | Resumen con IA de la charla, si está prendido (100 por día) |
+| `GET /business/attention`, `PUT /business/canned-replies`, `PUT /business/hours` | Respuestas guardadas y horario de atención (ver "Panel del negocio"). Fuera de horario, ante un `handoff` el usuario recibe el mensaje del negocio; el bot no |
 | `GET /business/events` | Avisos en el momento de qué charla cambió (Server-Sent Events), para la bandeja |
 | `GET`, `POST /business/team`, `PATCH` y `DELETE /business/team/<id>` | El equipo del negocio, solo con la sesión del dueño: `{"email","name","role":"empleado"|"gestor","canSeeChats"}`. Un empleado entra con su mail y solo ve Atención; un gestor administra el agente (perfil, bot, estadísticas) sin tocar claves, webhook ni equipo, y ve los chats solo con `canSeeChats: true` (`PATCH` lo cambia) |
 | `GET /business/agents` | "Mis agentes": todos los agentes que abre el mail de la sesión (los suyos, los que administra como gestor y los equipos en que está), con `role`, si el bot responde, el plan, el tipo y el uso del mes, más cuántos administra (`managed`) y la cuota del gestor (`feeUsd`: hasta 5, 0; de 6 a 25, 15; más de 25, 39; todavía no se cobra). Solo con la sesión del mail (con la clave: 403) |
