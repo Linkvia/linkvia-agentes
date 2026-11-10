@@ -57,6 +57,7 @@ Todas son atributos `data-` del `<script>`. Solo `data-handle` es obligatorio.
 | `data-handle` | El @ de tu negocio | `pizzeria` |
 | `data-text` | Un mensaje que queda escrito (la persona lo puede cambiar antes de mandarlo) | `Hola, quiero hacer un pedido` |
 | `data-start` | Nombre de campaña, para ver en el panel cuántos chats vinieron de la web | `web-home` |
+| `data-ref` | Qué anuncio, producto o sección es esta página. Tu bot lo recibe en cada mensaje. Letras, números y `- _ . : /`, hasta 100 | `anuncio-123` |
 | `data-mode` | `bubble` (globito, por defecto) o `inline` (dentro de la página) | `inline` |
 | `data-target` | En `inline`: dónde va el chat (selector CSS) | `#linkvia-chat` |
 | `data-load` | En `inline`, qué se ve antes del chat: `demo` (charla de muestra, por defecto), `click` (botón) o `visible` (el chat ya cargado) | `click` |
@@ -106,7 +107,8 @@ Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta*
 
 ## Privacidad
 
-- El iframe se abre sin decirle a Linkvia desde qué página vino (`no-referrer`).
+- Tu bot sabe desde qué página le escriben: recibe en cada mensaje la página donde está el widget, solo el dominio y la ruta (`https://tuweb.com/carta`), y tu `data-ref` si lo pusiste. Lo que va después de `?` o `#` no se manda nunca, porque ahí suele haber datos personales o de campañas. El iframe se abre con `no-referrer`, así el navegador tampoco manda la dirección completa. No pongas datos de la persona en la ruta ni en `data-ref`.
+- La página y el `data-ref` los informa el navegador de la persona, así que alguien los puede falsear. Usalos para dar contexto ("veo que estás mirando la cabaña Los Pinos"), no para dar permisos ni precios especiales.
 - Tu web no ve nada de la charla ni de la persona: el chat vive en el dominio de Linkvia y el navegador lo separa de tu página. Tu agente recibe lo mismo que en la app: el seudónimo y solo los datos que la persona aceptó compartir.
 - Solo la vista del chat (`/@negocio?embed=1`) se puede mostrar dentro de otra web; el resto de la app y el panel, no.
 - Si tu agente es privado (panel → **Acceso**), el widget abre el chat solo para quien ya es miembro: a los demás les llega el link de invitación, no el widget.

@@ -6,6 +6,7 @@ const EMPTY_REPLY = { contractVersion: "0", actions: [] };
 const EVENTS = [
   { name: "Mensaje del usuario", value: "message", description: "Texto, foto, video, audio, archivo, ubicación, botón o atajo" },
   { name: "Toque de botón (buttonTap)", value: "buttonTap" },
+  { name: "Voto en una encuesta (pollVote)", value: "pollVote" },
   { name: "Reacción", value: "reaction" },
   { name: "Empezó la charla (start)", value: "start" },
   { name: "Datos compartidos (consent)", value: "consent" },
@@ -16,6 +17,7 @@ const EVENTS = [
   { name: "Contacto agendado o bloqueado (contact)", value: "contact" },
   { name: "Charla vaciada (cleared)", value: "cleared" },
   { name: "Tocó Detener (streamStopped)", value: "streamStopped" },
+  { name: "Editó un mensaje (edited)", value: "edited" },
 ];
 
 class LinkviaTrigger {
@@ -67,9 +69,14 @@ class LinkviaTrigger {
               description: "Contesta enseguida; el flujo escribe después con el nodo Linkvia",
             },
             {
-              name: "Con el nodo Respond to Webhook",
+              name: "Con lo que devuelve el último nodo",
+              value: "lastNode",
+              description: 'El último nodo del flujo devuelve {"contractVersion":"0","actions":[…]}, en menos de 10 segundos',
+            },
+            {
+              name: "Con el nodo Respond to Webhook (versión 1)",
               value: "responseNode",
-              description: 'El flujo contesta con {"contractVersion":"0","actions":[…]} en menos de 10 segundos',
+              description: "Solo la versión 1 de ese nodo: las nuevas exigen el nodo Webhook de n8n. Mejor, la opción del último nodo",
             },
           ],
           default: "onReceived",
@@ -95,7 +102,8 @@ class LinkviaTrigger {
       res.status(200).json(EMPTY_REPLY);
       return { noWebhookResponse: true };
     }
-    if (this.getNodeParameter("responseMode", "onReceived") === "responseNode") {
+    const mode = this.getNodeParameter("responseMode", "onReceived");
+    if (mode === "responseNode" || mode === "lastNode") {
       return { workflowData: [this.helpers.returnJsonArray([event])] };
     }
     res.status(200).json(EMPTY_REPLY);

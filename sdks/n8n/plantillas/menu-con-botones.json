@@ -1,0 +1,60 @@
+{
+  "name": "Linkvia · Menú con botones y pase a una persona",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "message"
+        ],
+        "responseMode": "lastNode"
+      },
+      "name": "Linkvia Trigger",
+      "type": "n8n-nodes-linkvia.linkviaTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3b2d1c0e-5a4f-4e6d-8c7b-1a2b3c4d5e01",
+      "webhookId": "linkvia-menu-con-botones",
+      "credentials": {
+        "linkviaApi": {
+          "id": "",
+          "name": "Linkvia API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Qué contestar a cada mensaje. Cambiá los textos y las opciones por las de tu negocio.\nconst m = $json.message ?? {};\nconst elegido = m.choice?.id;\nconst texto = (m.text ?? '').toLowerCase();\nconst menu = { type: 'buttons', text: '¡Hola! ¿En qué te ayudo?', buttons: [\n  { id: 'horarios', title: 'Horarios' },\n  { id: 'precios', title: 'Precios' },\n  { id: 'persona', title: 'Hablar con alguien' },\n] };\nlet actions;\nif (elegido === 'horarios' || texto.includes('horario')) {\n  actions = [{ type: 'text', text: 'Abrimos de lunes a sábado, de 9 a 20.' }];\n} else if (elegido === 'precios' || texto.includes('precio')) {\n  actions = [{ type: 'list', text: 'Estos son nuestros precios:', button: 'Ver la lista', sections: [{ title: 'Servicios', rows: [\n    { id: 'corte', title: 'Corte', description: '$12.000' },\n    { id: 'color', title: 'Color', description: '$25.000' },\n  ] }] }];\n} else if (elegido === 'persona' || texto.includes('persona')) {\n  // El negocio la ve en Atención, en el panel, y la contesta una persona.\n  actions = [{ type: 'text', text: 'Te paso con alguien del equipo, ya te escribe.' }, { type: 'handoff', reason: 'Pidió hablar con una persona' }];\n} else {\n  actions = [menu];\n}\nreturn [{ json: { contractVersion: '0', actions } }];"
+      },
+      "name": "Elegir la respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "3b2d1c0e-5a4f-4e6d-8c7b-1a2b3c4d5e02"
+    }
+  ],
+  "connections": {
+    "Linkvia Trigger": {
+      "main": [
+        [
+          {
+            "node": "Elegir la respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

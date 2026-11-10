@@ -2,18 +2,17 @@
 
 Para armar el agente de un negocio en n8n sin nodos genéricos: el **Linkvia Trigger** recibe los mensajes con la firma ya verificada y el nodo **Linkvia** contesta.
 
-> **En prueba:** los nodos pasan sus pruebas automáticas, pero todavía no los probamos en un n8n de verdad. Si algo no anda, contanos por WhatsApp o en un issue de este repo.
-
-Todavía no están publicados en npm. Mientras tanto, en un n8n propio:
+Cuando estén en npm (todavía no), se instalan desde n8n: **Settings → Community nodes → Install** con `n8n-nodes-linkvia`. Mientras tanto, en un n8n propio, como paquete en la carpeta de nodos de n8n:
 
 ```bash
-cd ~/.n8n/custom          # creala si no existe
 git clone https://github.com/linkvia/linkvia-agentes /tmp/linkvia-agentes
-cp -r /tmp/linkvia-agentes/sdks/n8n n8n-nodes-linkvia
+cd /tmp/linkvia-agentes/sdks/n8n && npm pack          # arma n8n-nodes-linkvia-0.1.0.tgz
+mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes
+npm install /tmp/linkvia-agentes/sdks/n8n/n8n-nodes-linkvia-0.1.0.tgz
 # reiniciá n8n
 ```
 
-(o con Docker, montá la carpeta en `/home/node/.n8n/custom/n8n-nodes-linkvia`). No tiene dependencias: no hace falta `npm install`.
+Con Docker, lo mismo dentro de `/home/node/.n8n/nodes`. No tiene dependencias. No lo copies en `~/.n8n/custom`: ahí n8n le cambia el nombre a los nodos y las plantillas no los encuentran.
 
 ## Credencial "Linkvia API"
 
@@ -29,7 +28,8 @@ cp -r /tmp/linkvia-agentes/sdks/n8n n8n-nodes-linkvia
 2. Elegí qué eventos corren el flujo (por defecto, los mensajes). Los pings de Linkvia y los eventos no elegidos se contestan solos.
 3. Elegí cómo contestar:
    - **Al recibir, sin acciones** (por defecto): Linkvia recibe el OK enseguida y el flujo escribe cuando quiera con el nodo Linkvia. Sirve para agentes de IA que tardan.
-   - **Con el nodo Respond to Webhook**: el flujo contesta en la misma llamada con `{"contractVersion":"0","actions":[…]}`, en menos de 10 segundos.
+   - **Con lo que devuelve el último nodo**: el flujo contesta en la misma llamada; su último nodo devuelve `{"contractVersion":"0","actions":[…]}`, en menos de 10 segundos.
+   - **Con el nodo Respond to Webhook (versión 1)**: lo mismo, pero con ese nodo. Las versiones nuevas de Respond to Webhook solo andan después del nodo Webhook de n8n, así que conviene la opción anterior.
 
 El evento sale tal cual llega (ver [Conectar el bot de un negocio](../../docs/conectar-un-bot.md)): `{{ $json.message.text }}`, `{{ $json.conversation.id }}`, `{{ $json.message.choice.id }}`…
 
@@ -47,10 +47,14 @@ El evento sale tal cual llega (ver [Conectar el bot de un negocio](../../docs/co
 
 **Conversación** viene puesta como `{{ $json.conversation.id }}`: si el nodo va después del trigger, no hay que tocarla.
 
-## Un agente de ejemplo
+## Plantillas
 
-Linkvia Trigger → Linkvia (Mostrar escribiendo…) → tu modelo de IA → Linkvia (Mandar un texto con `{{ $json.output }}`).
+En `plantillas/` hay tres flujos listos para importar (**Workflows → Import from File**). Al abrirlos, elegí tu credencial "Linkvia API" en los nodos de Linkvia, activá el flujo y copiá la Production URL del trigger en el panel.
 
-## Tests
+| Plantilla | Qué hace |
+| --- | --- |
+| `menu-con-botones.json` | Contesta con botones (horarios, precios, hablar con alguien), una lista de precios y el pase a una persona del equipo (`handoff`). Todo en un nodo Code: cambiá los textos por los de tu negocio. |
+| `agente-con-ia.json` | Un agente con Claude: muestra "escribiendo…", lee los últimos 20 mensajes, se los pasa a la API de Anthropic y contesta. Necesita una credencial "Header Auth" con `x-api-key` y tu clave de Anthropic. Cambiá el texto de `SISTEMA` por lo que tiene que saber tu agente. |
+| `aviso-de-pedido.json` | Para tu sistema de pedidos: un webhook propio (con una clave en un encabezado) que recibe `{"conversationId", "pedido", "minutos", "aviso"}` y le escribe al cliente que su pedido salió. |
 
-`pnpm test` los prueba con un n8n de mentira (`packages/sdk/src/n8n.test.ts`).
+Las tres se probaron en n8n 2.46 con eventos firmados como los manda Linkvia.
