@@ -19,9 +19,11 @@ que devuelve el código HTTP y el cuerpo de la respuesta.
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import json
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -41,6 +43,7 @@ __all__ = [
     "sign_payload",
     "to_actions",
     "verify_signature",
+    "verify_web_app_token",
 ]
 
 __version__ = "0.1.0"
@@ -125,6 +128,45 @@ def verify_signature(
         return False
     # En bytes: compare_digest con textos no ASCII tira un error en vez de devolver False.
     return hmac.compare_digest(_hmac(secret, timestamp, _bytes(body)).encode(), given.encode("utf-8"))
+
+
+def verify_web_app_token(
+    secret: str, token: Optional[str], now: Optional[int] = None, handle: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """Quién abrió tu mini app (acción ``webApp``).
+
+    Tu página recibe ``#linkvia=<token>`` en la url y se lo manda a tu servidor. Devuelve
+    ``{"handle", "userId", "conversationId", "messageId", "iat", "exp", "jti"}`` (``userId`` es el
+    seudónimo de los eventos, nunca el teléfono) o ``None`` si el token no es tuyo, está cambiado o
+    venció. Con ``handle`` exige además que sea de ese agente. ``jti`` cambia en cada apertura:
+    guardalo hasta ``exp`` si querés que el token valga una sola vez.
+    """
+    if not secret or not isinstance(token, str) or len(token) > 4000:
+        return None
+    parts = token.split(".")
+    # Base64url sin relleno, tal cual lo arma Linkvia: un token tiene una sola forma de escribirse.
+    if len(parts) != 3 or parts[0] != "lvwa1" or not re.fullmatch(r"[A-Za-z0-9_-]+", parts[1]) or not re.fullmatch(r"[A-Za-z0-9_-]{43}", parts[2]):
+        return None
+    expected = hmac.new(secret.encode("utf-8"), f"linkvia/webapp/v1.{parts[1]}".encode("utf-8"), hashlib.sha256).digest()
+    try:
+        received = base64.urlsafe_b64decode(parts[2] + "=" * (-len(parts[2]) % 4))
+        if not hmac.compare_digest(expected, received):
+            return None
+        session = json.loads(base64.urlsafe_b64decode(parts[1] + "=" * (-len(parts[1]) % 4)).decode("utf-8"))
+    except (ValueError, UnicodeError):
+        return None
+    if not isinstance(session, dict) or not all(
+        isinstance(session.get(k), str) and session.get(k) for k in ("handle", "userId", "conversationId", "messageId", "jti")
+    ):
+        return None
+    iat, exp = session.get("iat"), session.get("exp")
+    if not all(isinstance(n, int) and not isinstance(n, bool) for n in (iat, exp)):
+        return None
+    if (int(time.time()) if now is None else now) > exp:
+        return None
+    if handle is not None and handle.lstrip("@").lower() != session["handle"].lower():
+        return None
+    return {k: session[k] for k in ("handle", "userId", "conversationId", "messageId", "iat", "exp", "jti")}
 
 
 # --- Respuestas ---
@@ -221,28 +263,51 @@ class ReplyStream:
 class LinkviaBot:
     """El bot de un negocio conectado a Linkvia.
 
-    :param webhook_secret: el secreto del webhook (``whsec_…``), para verificar los eventos.
-    :param api_key: la clave de API del negocio (``lv_…``). Hace falta para escribir por iniciativa propia.
+    :param webhook_secret: el secreto del webhook (``whsec_…``), para verificar los eventos. Un bot
+        sin servidor (que usa ``poll``) no lo necesita.
+    :param api_key: la clave de API del negocio (``lv_…``) o la de tu cuenta de gestor (``lvg_…``, con ``agent``). Hace falta para escribir por iniciativa propia.
     :param api_url: la dirección de la API de Linkvia, terminada en ``/api``.
+    :param agent: con la clave de una cuenta de gestor (``lvg_…``), el @ del agente como el que
+        escribís. Para otro de tus agentes con las mismas credenciales, ``bot.for_agent("@otro")``.
     """
 
     def __init__(
         self,
-        webhook_secret: str,
+        webhook_secret: Optional[str] = None,
         api_key: Optional[str] = None,
         api_url: str = DEFAULT_API_URL,
         timeout: float = 30,
         transport: Optional[Transport] = None,
+        agent: Optional[str] = None,
     ) -> None:
-        if not webhook_secret:
-            raise ValueError("Falta webhook_secret")
+        self._agent = agent
+        if not webhook_secret and not api_key:
+            raise ValueError("Falta webhook_secret (o api_key, para un bot sin servidor)")
         self._webhook_secret = webhook_secret
         self._api_key = api_key
         self.api_url = api_url.rstrip("/")
         host = urllib.parse.urlsplit(self.api_url).hostname or ""
         if not self.api_url.startswith("https://") and host not in ("localhost", "127.0.0.1"):
             raise ValueError("api_url tiene que ser https (salvo localhost, para desarrollo)")
+        self._timeout = timeout
         self._transport = transport or _default_transport(timeout)
+
+    def for_agent(self, handle: str) -> "LinkviaBot":
+        """Cuenta de gestor: el mismo bot, escribiendo como otro de tus agentes (``event["business"]["handle"]``)."""
+        return LinkviaBot(self._webhook_secret, self._api_key, self.api_url, self._timeout, self._transport, agent=handle)
+
+    def web_app_session(self, token: Optional[str], handle: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Quién abrió tu mini app: verifica el token con tu ``webhook_secret``.
+
+        Con cuenta de gestor el secreto es el mismo para todos tus agentes, así que exige de cuál
+        es: el de ``for_agent`` o ``handle``.
+        """
+        if not self._webhook_secret:
+            raise LinkviaError("Falta webhook_secret para verificar el token de una mini app", 401)
+        wanted = handle if handle is not None else self._agent
+        if wanted is None and (self._api_key or "").startswith("lvg_"):
+            raise LinkviaError('Con la clave de gestor, decí de qué agente es la mini app: bot.for_agent("@tu_agente")', 400)
+        return verify_web_app_token(self._webhook_secret, token, handle=wanted)
 
     def __repr__(self) -> str:
         # Nunca mostrar las claves en logs.
@@ -252,6 +317,8 @@ class LinkviaBot:
 
     def parse_webhook(self, raw_body: Union[str, bytes], signature: Optional[str]) -> Event:
         """Verifica la firma y devuelve el evento. Tira ``LinkviaError`` (401) si no viene de Linkvia."""
+        if not self._webhook_secret:
+            raise LinkviaError("Falta webhook_secret para recibir eventos en un webhook", 401)
         if not verify_signature(self._webhook_secret, raw_body, signature):
             raise LinkviaError("La firma del evento no es válida", 401)
         return json.loads(_bytes(raw_body).decode("utf-8"))
@@ -328,6 +395,53 @@ class LinkviaBot:
         finally:
             server.server_close()
 
+    # --- Sin servidor: pedir los eventos ---
+
+    def get_updates(self, offset: int = 0, timeout: int = 25) -> List[Dict[str, Any]]:
+        """Bot sin servidor (webhook ``linkvia:sin-servidor``): los eventos que esperan.
+
+        Si no hay, Linkvia espera hasta ``timeout`` segundos (25 como mucho). ``offset`` confirma lo
+        anterior: pasá el último ``updateId`` + 1. Cada uno es ``{"updateId": n, "event": {...}}``.
+        """
+        result = self._call("GET", f"/bot/v0/updates?offset={int(offset)}&timeout={int(timeout)}")
+        return (result or {}).get("updates", [])
+
+    def poll(self, on_event: Callable[[Event], Reply], timeout: int = 25, stop: Optional[Callable[[], bool]] = None) -> None:
+        """El loop de un bot sin servidor: pide los eventos, llama a ``on_event`` y manda lo que
+        devuelva a la charla. Sigue hasta que ``stop()`` dé True (o para siempre). Si Linkvia no
+        responde, reintenta cada vez más espaciado; con la clave mal, corta."""
+        offset = 0
+        wait = 1.0
+        # Que Linkvia conteste antes de que el pedido se corte de este lado.
+        timeout = max(0, min(int(timeout), int(self._timeout) - 5))
+        while not (stop and stop()):
+            try:
+                updates = self.get_updates(offset, timeout)
+                wait = 1.0
+            except LinkviaError as err:
+                # Clave mal, negocio dado de baja o con webhook: reintentar no lo arregla.
+                if err.status in (400, 401, 403, 404, 410):
+                    raise
+                updates = None
+            except OSError:
+                updates = None
+            if updates is None:
+                time.sleep(wait)
+                wait = min(wait * 2, 60.0)
+                continue
+            for update in updates:
+                offset = int(update["updateId"]) + 1
+                event = update["event"]
+                try:
+                    reply = on_event(event)
+                    if isinstance(reply, Toast):
+                        reply = reply.reply
+                    conversation = event.get("conversation") or {}
+                    if to_actions(reply) and conversation.get("id"):
+                        self.send(conversation["id"], reply)
+                except Exception as err:  # noqa: BLE001 (un evento que falla no corta el loop)
+                    print(f"[linkvia] El bot falló con un evento {event.get('type')}: {err}")
+
     # --- Escribir después ---
 
     def send(self, conversation_id: str, reply: Reply, notice: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -385,6 +499,8 @@ class LinkviaBot:
         if not self._api_key:
             raise LinkviaError("Falta api_key para escribir por iniciativa propia", 401)
         headers = {"authorization": f"Bearer {self._api_key}", "user-agent": f"linkvia-python/{__version__}"}
+        if self._agent:
+            headers["linkvia-agent"] = self._agent
         data = None
         if body is not None:
             headers["content-type"] = "application/json"

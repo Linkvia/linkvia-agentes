@@ -1,0 +1,203 @@
+{
+  "name": "Linkvia · Agente con IA (Claude)",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "message"
+        ],
+        "responseMode": "onReceived"
+      },
+      "name": "Linkvia Trigger",
+      "type": "n8n-nodes-linkvia.linkviaTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7a1c2a4e-1f0b-4c55-9f3a-0b6a1c0e1a01",
+      "webhookId": "linkvia-agente-con-ia",
+      "credentials": {
+        "linkviaApi": {
+          "id": "",
+          "name": "Linkvia API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "typing",
+        "conversationId": "={{ $('Linkvia Trigger').item.json.conversation.id }}"
+      },
+      "name": "Mostrar escribiendo",
+      "type": "n8n-nodes-linkvia.linkvia",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "7a1c2a4e-1f0b-4c55-9f3a-0b6a1c0e1a02",
+      "credentials": {
+        "linkviaApi": {
+          "id": "",
+          "name": "Linkvia API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "history",
+        "conversationId": "={{ $('Linkvia Trigger').item.json.conversation.id }}",
+        "limit": 20
+      },
+      "name": "Leer el historial",
+      "type": "n8n-nodes-linkvia.linkvia",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "7a1c2a4e-1f0b-4c55-9f3a-0b6a1c0e1a03",
+      "credentials": {
+        "linkviaApi": {
+          "id": "",
+          "name": "Linkvia API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// La charla como la pide Claude: los últimos mensajes, alternando usuario y agente.\n// Cambiá SISTEMA por lo que tiene que saber tu agente (horarios, precios, cómo contestar).\nconst SISTEMA = 'Sos el asistente de un negocio. Contestá corto, en castellano rioplatense y con amabilidad. Si no sabés algo, decilo y ofrecé pasar con una persona.';\nconst historial = $json.messages ?? [];\nconst mensajes = [];\nfor (const m of historial) {\n  if (m.deleted || m.from === 'system') continue;\n  const role = m.from === 'user' ? 'user' : 'assistant';\n  const last = mensajes[mensajes.length - 1];\n  if (last && last.role === role) last.content += '\\n' + m.text;\n  else mensajes.push({ role, content: m.text });\n}\nwhile (mensajes.length && mensajes[0].role !== 'user') mensajes.shift();\n// Claude contesta al último mensaje del usuario: lo que el agente ya dijo después, se saca.\nwhile (mensajes.length && mensajes[mensajes.length - 1].role !== 'user') mensajes.pop();\nif (!mensajes.length) mensajes.push({ role: 'user', content: $('Linkvia Trigger').item.json.message.text });\nreturn [{ json: { model: 'claude-haiku-5-5', max_tokens: 800, system: SISTEMA, messages: mensajes } }];"
+      },
+      "name": "Armar la charla",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "7a1c2a4e-1f0b-4c55-9f3a-0b6a1c0e1a04"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "name": "Preguntarle a Claude",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "7a1c2a4e-1f0b-4c55-9f3a-0b6a1c0e1a05",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Clave de Anthropic (x-api-key)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendText",
+        "conversationId": "={{ $('Linkvia Trigger').item.json.conversation.id }}",
+        "text": "={{ $json.content.filter(c => c.type === 'text').map(c => c.text).join('\\n') }}"
+      },
+      "name": "Contestar",
+      "type": "n8n-nodes-linkvia.linkvia",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        0
+      ],
+      "id": "7a1c2a4e-1f0b-4c55-9f3a-0b6a1c0e1a06",
+      "credentials": {
+        "linkviaApi": {
+          "id": "",
+          "name": "Linkvia API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Linkvia Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mostrar escribiendo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mostrar escribiendo": {
+      "main": [
+        [
+          {
+            "node": "Leer el historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer el historial": {
+      "main": [
+        [
+          {
+            "node": "Armar la charla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar la charla": {
+      "main": [
+        [
+          {
+            "node": "Preguntarle a Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preguntarle a Claude": {
+      "main": [
+        [
+          {
+            "node": "Contestar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

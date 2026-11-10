@@ -1,3 +1,6 @@
+import base64
+import hashlib
+import hmac
 import json
 import os
 import sys
@@ -12,6 +15,7 @@ from linkvia import (  # noqa: E402
     sign_payload,
     to_actions,
     verify_signature,
+    verify_web_app_token,
 )
 
 SECRET = "whsec_prueba"
@@ -52,6 +56,25 @@ class Firma(unittest.TestCase):
         self.assertFalse(verify_signature(SECRET, "{}", header, now=1301))
         for bad in [None, "", "t=abc,v1=00", "t=1000", "v1=00", "basura", "t=1000,v1=ñ"]:
             self.assertFalse(verify_signature(SECRET, "{}", bad, now=1000), bad)
+
+    def test_token_de_mini_app(self):
+        # Armado como lo arma Linkvia (packages/bot-contract/src/signature.ts).
+        data = base64.urlsafe_b64encode(json.dumps({"handle": "pizzeria", "userId": "u1", "conversationId": "c1", "messageId": "m1", "iat": 1000, "exp": 1600, "jti": "abc"}).encode()).decode().rstrip("=")
+        sig = base64.urlsafe_b64encode(hmac.new(SECRET.encode(), f"linkvia/webapp/v1.{data}".encode(), hashlib.sha256).digest()).decode().rstrip("=")
+        token = f"lvwa1.{data}.{sig}"
+        self.assertEqual(verify_web_app_token(SECRET, token, now=1600)["userId"], "u1")
+        self.assertIsNone(verify_web_app_token(SECRET, token, now=1601))
+        self.assertEqual(verify_web_app_token(SECRET, token, now=1000, handle="@Pizzeria")["jti"], "abc")
+        self.assertIsNone(verify_web_app_token(SECRET, token, now=1000, handle="otro"))
+        self.assertIsNone(verify_web_app_token("whsec_otro", token, now=1000))
+        # Con la clave de gestor el secreto es compartido: hay que decir de qué agente es.
+        gestor = LinkviaBot(webhook_secret=SECRET, api_key="lvg_x")
+        with self.assertRaises(LinkviaError):
+            gestor.web_app_session(token)
+        self.assertIsNone(gestor.for_agent("@otro").web_app_session(token))
+        self.assertIsNone(LinkviaBot(webhook_secret=SECRET).web_app_session("basura"))
+        for bad in [None, "", "lvwa1.a", f"lvwa1.{data}.ñ", f"otro.{data}.{sig}", f"lvwa1.{data}x.{sig}"]:
+            self.assertIsNone(verify_web_app_token(SECRET, bad, now=1000), bad)
 
     def test_acepta_tildes_en_el_cuerpo(self):
         body = json.dumps(EVENT, ensure_ascii=False)
@@ -110,6 +133,14 @@ class Escribir(unittest.TestCase):
         self.assertEqual(body, {"contractVersion": "0", "conversationId": "conv-1", "actions": [{"type": "text", "text": "Tu pedido salió 🛵"}], "notice": "pedido-1042"})
         bot.send("conv-1", [{"type": "text", "text": "a"}])
         self.assertNotIn("notice", api.calls[1][3])
+
+    def test_cuenta_de_gestor_dice_para_que_agente_escribe(self):
+        bot, api = self.bot()
+        bot.send("conv-1", "hola")
+        self.assertNotIn("linkvia-agent", api.calls[0][2])
+        bot.for_agent("@pelu").send("conv-1", "hola")
+        self.assertEqual(api.calls[1][2]["linkvia-agent"], "@pelu")
+        self.assertEqual(api.calls[1][2]["authorization"], "Bearer lv_x")
 
     def test_send_devuelve_los_mensajes_para_mover_la_ubicacion(self):
         bot, api = self.bot((201, b'[{"id":"m9","from":"bot"}]'), (200, b"{}"))
@@ -178,6 +209,29 @@ class Escribir(unittest.TestCase):
         reply.end("Respuesta final")
         self.assertEqual(api.calls[1][3], {"text": "borrador"})
         self.assertEqual(api.calls[2][3], {"text": "Respuesta final"})
+
+
+class SinServidor(unittest.TestCase):
+    def test_poll_pide_contesta_y_confirma(self):
+        evento = {"type": "message", "conversation": {"id": "conv-1"}, "message": {"text": "hola"}}
+        api = FakeApi(
+            (200, json.dumps({"contractVersion": "0", "updates": [{"updateId": 7, "event": evento}]}).encode()),
+            (201, b"[]"),
+            (200, b'{"contractVersion": "0", "updates": []}'),
+        )
+        bot = LinkviaBot(api_key="lv_x", api_url="https://linkvia.test/api", transport=api)
+        vueltas = []
+        bot.poll(lambda e: "Recibí: " + e["message"]["text"], timeout=5, stop=lambda: vueltas.append(1) or len(vueltas) > 2)
+        self.assertEqual(api.calls[0][:2], ("GET", "https://linkvia.test/api/bot/v0/updates?offset=0&timeout=5"))
+        self.assertEqual(api.calls[1][3]["actions"], [{"type": "text", "text": "Recibí: hola"}])
+        self.assertEqual(api.calls[2][:2], ("GET", "https://linkvia.test/api/bot/v0/updates?offset=8&timeout=5"))
+
+    def test_sin_secreto_no_recibe_webhooks(self):
+        bot = LinkviaBot(api_key="lv_x", api_url="https://linkvia.test/api", transport=FakeApi())
+        with self.assertRaises(LinkviaError):
+            bot.parse_webhook("{}", None)
+        with self.assertRaises(ValueError):
+            LinkviaBot()
 
 
 class Seguridad(unittest.TestCase):

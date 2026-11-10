@@ -59,6 +59,19 @@ async def webhook(request: Request):
     return Response(body, status_code=status, media_type="application/json")
 ```
 
+## Sin servidor
+
+Si tu bot corre en una compu o un script, sin dirección pública con https, poné `linkvia:sin-servidor` como webhook (en el panel, "Mi bot no tiene servidor") y pedí los mensajes con `poll`. No hace falta el secreto del webhook.
+
+```python
+from linkvia import LinkviaBot, is_message
+
+bot = LinkviaBot(api_key=os.environ["LINKVIA_API_KEY"])
+bot.poll(lambda evento: "Recibí: " + evento["message"]["text"] if is_message(evento) else None)
+```
+
+`poll` espera hasta 25 segundos a que llegue algo, llama a tu función y manda lo que devuelva a la charla. `get_updates(offset, timeout)` es el pedido suelto. Ojo: con `api_key` y sin `webhook_secret` el bot arranca igual, pero si usás webhook cada evento va a fallar con 401; revisá que la variable del secreto esté cargada.
+
 ## Escribir después
 
 Linkvia espera la respuesta en menos de 10 segundos. Si el agente tarda más, devolvé `None` y escribí cuando esté:
@@ -101,3 +114,15 @@ python3 -m unittest discover -s sdks/python/tests
 ```
 
 `pnpm test` también los corre y compara la firma con la de `@linkvia/bot-contract`.
+
+## Mini apps
+
+Con la acción `webApp` tu página se abre adentro del chat con `#linkvia=<token>`. Tu página manda ese token a tu servidor y ahí:
+
+```python
+from linkvia import verify_web_app_token
+
+session = verify_web_app_token(webhook_secret, token)  # dict con handle, userId, conversationId, messageId, iat, exp, jti; o None
+```
+
+`userId` es el mismo seudónimo de los eventos. El token vence a los 10 minutos.
