@@ -18,7 +18,10 @@ export function firmaValida(cuerpo, encabezado = "") {
   return esperada.length === recibida.length && timingSafeEqual(esperada, recibida);
 }
 
-/** Manda mensajes a una conversación sin esperar a que el cliente escriba (avisos, recordatorios). */
+/**
+ * Manda mensajes a una conversación sin esperar a que el cliente escriba (avisos, recordatorios).
+ * Si salió bien devuelve los mensajes creados (con su `id`, para editarlos después); si no, `false`.
+ */
 export async function enviar(conversationId, actions) {
   if (!CLAVE_API) {
     console.warn("Falta LINKVIA_API_KEY: no puedo mandar avisos por mi cuenta.");
@@ -33,9 +36,31 @@ export async function enviar(conversationId, actions) {
     if (r.status === 429) console.warn("Linkvia respondió 429: llegaste al tope de 5 mensajes por día a un cliente que no te escribió en las últimas 24 horas.");
     else if (r.status === 400) console.warn("Linkvia respondió 400: revisá el mensaje (por ejemplo, un link acortado) o el cliente quitó o bloqueó al negocio.");
     else if (!r.ok) console.warn(`Linkvia respondió ${r.status} al mandar un aviso.`);
-    return r.ok;
+    if (!r.ok) return false;
+    const creados = await r.json().catch(() => []);
+    return Array.isArray(creados) ? creados : [];
   } catch (e) {
     console.warn("No pude mandar un aviso:", e.message);
+    return false;
+  }
+}
+
+/**
+ * Cambia un mensaje que ya mandó el bot, por ejemplo la tarjeta de un pedido cuando cambia de estado
+ * (un `order` se puede actualizar hasta 30 días después). Devuelve si salió bien.
+ */
+export async function editar(messageId, action) {
+  if (!CLAVE_API || !messageId) return false;
+  try {
+    const r = await fetch(`${API}/bot/v0/messages/${encodeURIComponent(messageId)}`, {
+      method: "PATCH",
+      headers: { authorization: `Bearer ${CLAVE_API}`, "content-type": "application/json" },
+      body: JSON.stringify({ contractVersion: "0", action }),
+    });
+    if (!r.ok) console.warn(`Linkvia respondió ${r.status} al actualizar el mensaje ${messageId}.`);
+    return r.ok;
+  } catch (e) {
+    console.warn("No pude actualizar un mensaje:", e.message);
     return false;
   }
 }

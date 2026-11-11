@@ -8,7 +8,8 @@ Agente de pedidos para cualquier local de comida con envío o retiro: rotisería
 - Arma el pedido con cantidades y muestra el subtotal.
 - Delivery o retiro: zonas con costo de envío y pedido mínimo, o la dirección del local.
 - Pide nombre y dirección **con permiso del cliente** (y si ya los compartió antes, no los vuelve a pedir).
-- Pago anticipado, al recibir, o a elección del cliente, con Mercado Pago.
+- **Tarjeta del pedido en el chat** (acción `order`): renglones, envío, total y en qué está ("Falta pagar", "Pagado", "En preparación", "En camino", "Entregado"). Se actualiza sola cuando la cocina toca un botón del panel, y además llega un aviso de texto para que suene el celular.
+- Pago anticipado, al recibir, o a elección del cliente, con Mercado Pago: el botón **Pagar** de la tarjeta abre el link del local. Linkvia no cobra ni cobra comisión: la plata va directo a la cuenta del local.
 - Fuera de horario avisa que está cerrado y a qué hora abre.
 - Panel en `/panel` para la cocina: pedidos en curso con botones "En preparación", "Salió" o "Listo para retirar" y "Entregado". Cada botón le avisa al cliente.
 
@@ -20,7 +21,8 @@ Agente de pedidos para cualquier local de comida con envío o retiro: rotisería
 > **Agente:** Sumé 2 × Muzzarella. Llevás $24.000. [Agregar más] [Ver pedido] [Terminar pedido]
 > **Cliente:** *(Terminar, Delivery, Centro, comparte nombre y dirección)*
 > **Agente:** *Resumen* 2 × Muzzarella: $24.000. Delivery a Av. Siempreviva 742 (envío $1.500). Total: *$25.500* [Confirmar pedido]
-> *(la cocina toca "Salió")* **Agente:** ¡Tu pedido *PQR3Y* salió! Ya va en camino. 🛵
+> *(tarjeta)* **Pedido de Rotisería Don Luis PQR3Y** · Falta pagar · 2 × Muzzarella $24.000 · Envío $1.500 · Total $25.500 [Pagar $ 25.500]
+> *(la cocina toca "Salió": la tarjeta pasa a "En camino")* **Agente:** ¡Tu pedido *PQR3Y* salió! Ya va en camino. 🛵
 
 ## Qué se configura (`config.json`)
 

@@ -43,6 +43,13 @@ function mostrar(actions, origen = "Agente") {
         }
       }
     } else if (a.type === "link") linea(`${a.text}\n   [${a.label}] ${a.url}`);
+    else if (a.type === "order") {
+      const estados = { pending: "Falta pagar", paid: "Pagado", preparing: "En preparación", onTheWay: "En camino", delivered: "Entregado", cancelled: "Cancelado" };
+      linea(`[${a.title || "Pedido"}${a.reference ? ` ${a.reference}` : ""}] ${estados[a.status || "pending"]}`);
+      for (const i of a.items) console.log(`   ${i.quantity ? `${i.quantity} × ` : ""}${i.title}${i.amount !== undefined ? `: $${i.amount}` : ""}`);
+      console.log(`   Total: $${a.total}${a.note ? ` · ${a.note}` : ""}`);
+      if (a.payUrl && (a.status || "pending") === "pending") console.log(`   [Pagar] ${a.payUrl}`);
+    }
     else if (a.type === "requestConsent") {
       pedidoDeDatos = a;
       linea(`pide tus datos (${a.dataTypes.join(", ")}) "${a.purpose}". Escribí "compartir" o "no compartir".`);
@@ -75,10 +82,17 @@ async function mandar(evento) {
 createServer(async (req, res) => {
   let cuerpo = "";
   for await (const p of req) cuerpo += p;
-  if (req.url === "/bot/v0/messages") {
+  if (req.method === "POST" && req.url === "/bot/v0/messages") {
     const { conversationId, actions } = JSON.parse(cuerpo);
     if (conversationId === conversacion.id) mostrar(actions, "Agente (aviso)");
     else console.log(`(aviso para otra conversación: ${conversationId})`);
+    // Como Linkvia: devuelve los mensajes creados, con su id.
+    const creados = actions.map(() => ({ id: `msg_${randomUUID()}`, conversationId }));
+    return res.writeHead(201, { "content-type": "application/json" }).end(JSON.stringify(creados));
+  }
+  if (req.method === "PATCH" && req.url.startsWith("/bot/v0/messages/")) {
+    const { action } = JSON.parse(cuerpo);
+    mostrar([action], "Agente (actualiza)");
   }
   res.writeHead(200, { "content-type": "application/json" }).end("{}");
 }).listen(PUERTO_API, () => {
