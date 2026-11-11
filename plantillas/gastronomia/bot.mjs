@@ -2,7 +2,7 @@
 // Rotisería, pizzería, viandas, hamburguesería, sushi, heladería, cafetería: cualquier local con envío o retiro.
 // Muestra el menú, arma el pedido, pide dirección con permiso del cliente, cobra (opcional) y avisa el estado.
 // Todo lo del negocio (menú, zonas, horarios, forma de pago) está en config.json.
-import { iniciar, enviar, texto, botones, lista, enlace, pasarAPersona, pesos } from "../comun/linkvia.mjs";
+import { iniciar, enviar, editar, texto, botones, lista, enlace, pasarAPersona, pesos, corto } from "../comun/linkvia.mjs";
 import { almacen, leerConfig, codigo } from "../comun/datos.mjs";
 import { diaSemana, fechaLocal, horaLocal, minutos } from "../comun/hora.mjs";
 import { crearCobro, cobroAutomatico, rutaAvisos } from "../comun/mercadopago.mjs";
@@ -180,18 +180,62 @@ async function confirmar(evento) {
     pago: "al_recibir",
     creado: new Date().toISOString(),
   };
+  if (config.pago === "anticipado") p.estado = "esperando_pago";
+  if (config.pago === "a_eleccion") p.estado = "eligiendo_pago";
   datos.pedidos.push(p);
   delete datos.carritos[evento.user.id];
   guardar();
+  const conTarjeta = await mandarTarjeta(p);
 
-  if (config.pago === "anticipado") return cobrar(p);
+  if (config.pago === "anticipado") return [...conTarjeta, ...(await cobrar(p))];
   if (config.pago === "a_eleccion") {
-    p.estado = "eligiendo_pago";
-    guardar();
-    return [botones(`Pedido *${p.id}* anotado. ¿Cómo pagás?`, [[`pagar:${p.id}`, "Pagar ahora"], [`alrecibir:${p.id}`, p.entrega === "delivery" ? "Al recibir" : "Al retirar"]])];
+    return [
+      ...conTarjeta,
+      botones(`Pedido *${p.id}* anotado. ¿Cómo pagás?`, [[`pagar:${p.id}`, "Pagar ahora"], [`alrecibir:${p.id}`, p.entrega === "delivery" ? "Al recibir" : "Al retirar"]]),
+    ];
   }
-  return [texto(confirmado(p))];
+  return [...conTarjeta, texto(confirmado(p))];
 }
+
+// La tarjeta del pedido en el chat (acción `order`): renglones, total, estado y, si falta pagar,
+// el botón Pagar con el link del local. Linkvia no cobra: la plata va directo a la cuenta del local.
+const ESTADO_TARJETA = { eligiendo_pago: "pending", esperando_pago: "pending", preparando: "preparing", entregado: "delivered", cancelado: "cancelled" };
+
+function tarjeta(p) {
+  let status = ESTADO_TARJETA[p.estado] || (p.pago === "pagado" ? "paid" : "pending");
+  if (p.estado === "listo") status = p.entrega === "delivery" ? "onTheWay" : "preparing";
+  const notas = [
+    p.entrega === "delivery" ? `Delivery, en unos ${config.delivery.demoraMinutos} minutos.` : `Retirás en ${config.retiro.direccion}.`,
+    p.estado === "listo" && p.entrega !== "delivery" ? "¡Listo para retirar!" : "",
+    p.pago !== "pagado" && !["esperando_pago", "eligiendo_pago", "cancelado"].includes(p.estado) ? (p.entrega === "delivery" ? "Pagás al recibir." : "Pagás al retirar.") : "",
+  ];
+  return {
+    type: "order",
+    reference: p.id,
+    title: corto(`Pedido de ${config.negocio}`, 60),
+    items: [
+      ...p.items.slice(0, 29).map((i) => ({ title: corto(i.nombre, 100), quantity: i.cantidad, amount: i.precio * i.cantidad })),
+      ...(p.envio ? [{ title: "Envío", amount: p.envio }] : []),
+    ],
+    total: p.total,
+    status,
+    note: corto(notas.filter(Boolean).join(" "), 300),
+    ...(p.estado === "esperando_pago" && p.link && { payUrl: p.link }),
+  };
+}
+
+// Manda la tarjeta por la API para guardar su id y poder actualizarla. Sin clave de API (o si falla)
+// la tarjeta va en la respuesta, y el cliente sigue el pedido con los avisos de texto.
+async function mandarTarjeta(p) {
+  const creados = await enviar(p.conversacion, [tarjeta(p)]);
+  if (creados && creados[0]?.id) {
+    p.tarjeta = creados[0].id;
+    guardar();
+    return [];
+  }
+  return [tarjeta(p)];
+}
+const actualizarTarjeta = (p) => (p.tarjeta ? editar(p.tarjeta, tarjeta(p)) : false);
 
 const confirmado = (p) =>
   `¡Listo! Pedido *${p.id}* en la cocina. ${p.entrega === "delivery" ? `Llega en unos ${config.delivery.demoraMinutos} minutos.` : `Pasá a buscarlo en unos ${config.retiro.demoraMinutos} minutos por ${config.retiro.direccion}.`} Te aviso por acá cómo va.`;
@@ -201,7 +245,11 @@ async function cobrar(p) {
   p.venceElPago = new Date(Date.now() + MINUTOS_PARA_PAGAR * 60_000).toISOString();
   guardar();
   const link = (await crearCobro({ titulo: `Pedido ${p.id} de ${config.negocio}`, monto: p.total, referencia: p.id, venceEnMinutos: MINUTOS_PARA_PAGAR })) || config.linkDePago;
+  p.link = link;
+  guardar();
   const como = cobroAutomatico ? "Apenas se acredite, lo mandamos a la cocina." : `Si el link no tiene el monto, poné ${pesos(p.total)}. Después mandá el comprobante por acá con el código ${p.id}.`;
+  // Con la tarjeta en el chat, el botón Pagar queda en ella; si no, va un link aparte.
+  if (link && (await actualizarTarjeta(p))) return [texto(`Pedido *${p.id}*: ${pesos(p.total)}. Tocá *Pagar* en la tarjeta del pedido. ${como}`)];
   return [texto(`Pedido *${p.id}*: ${pesos(p.total)}. ${como}`), enlace("Pagá con Mercado Pago:", "Pagar pedido", link)];
 }
 
@@ -211,6 +259,7 @@ async function pagado(referencia) {
   p.estado = "nuevo";
   p.pago = "pagado";
   guardar();
+  await actualizarTarjeta(p);
   await enviar(p.conversacion, [texto(`¡Pago recibido! ${confirmado(p)}`)]);
 }
 
@@ -263,6 +312,7 @@ async function responder(evento) {
   if (accion === "alrecibir" && propio) {
     propio.estado = "nuevo";
     guardar();
+    await actualizarTarjeta(propio);
     return [texto(confirmado(propio))];
   }
 
@@ -278,6 +328,7 @@ async function cadaMinuto() {
   for (const p of datos.pedidos.filter((x) => x.estado === "esperando_pago" && new Date(x.venceElPago) < new Date())) {
     p.estado = "cancelado";
     guardar();
+    await actualizarTarjeta(p);
     await enviar(p.conversacion, [botones(`Cancelé el pedido *${p.id}* porque no llegó el pago. Si querés, lo hacemos de nuevo.`, [["pedir", "Hacer un pedido"]])]);
   }
 }
@@ -325,6 +376,8 @@ const rutasPanel = panel({
     if (!AVISOS[accion]) return;
     p.estado = accion;
     guardar();
+    // La tarjeta cambia sin hacer sonar el celular; el aviso de texto sí suena.
+    await actualizarTarjeta(p);
     await enviar(p.conversacion, [texto(AVISOS[accion](p))]);
   },
 });
