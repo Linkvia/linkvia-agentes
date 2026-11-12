@@ -62,6 +62,9 @@ Todas son atributos `data-` del `<script>`. Solo `data-handle` es obligatorio.
 | `data-target` | En `inline`: dónde va el chat (selector CSS) | `#linkvia-chat` |
 | `data-load` | En `inline`, qué se ve antes del chat: `demo` (charla de muestra, por defecto), `click` (botón) o `visible` (el chat ya cargado) | `click` |
 | `data-demo` | En `inline` con `demo`: las frases de la muestra, separadas por `\|` | `Hola\|¡Hola! ¿En qué te ayudo?` |
+| `data-greet` | En el globito: un mensaje que aparece al lado del botón, como si te escribiera el negocio (hasta 200 letras). Va una vez por página y se va si la persona lo cierra; si lo toca, se abre el chat. No se guarda ni le llega a tu bot | `¿Te ayudo a elegir?` |
+| `data-greet-after` | Cuántos segundos espera para mostrarlo, de 0 a 600 (10 por defecto) | `20` |
+| `data-greet-path` | Solo en esa página y las de adentro (`/menu` vale para `/menu/pizzas`, no para `/menues`). Sin esto, en todas | `/menu` |
 | `data-preset` | Estilo listo: `linkvia` (por defecto) o `whatsapp` (ícono de teléfono, verde `#25D366`) | `whatsapp` |
 | `data-color` | Color del botón: `#rrggbb`, `rgb(...)`, `hsl(...)` o un nombre | `#ff6b4a` |
 | `data-icon-color` | Color del ícono (blanco por defecto) | `#111b21` |
@@ -71,6 +74,12 @@ Todas son atributos `data-` del `<script>`. Solo `data-handle` es obligatorio.
 | `data-offset` | Distancia al borde, en píxeles (20 por defecto). También `data-offset-x` y `data-offset-y` | `24` |
 | `data-width`, `data-height` | Tamaño del panel (globito) o del chat (inline). En px, %, vh, vw o rem | `420`, `70vh` |
 | `data-label` | Lo que lee un lector de pantalla y el cartelito al pasar el mouse | `Pedí por chat` |
+
+Un mensaje automático a los 20 segundos en la carta:
+
+```html
+<script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-greet="¿Te ayudo a elegir?" data-greet-after="20" data-greet-path="/menu" async></script>
+```
 
 Un ejemplo con todo al estilo del botón de WhatsApp, a la izquierda y un poco más chico:
 
