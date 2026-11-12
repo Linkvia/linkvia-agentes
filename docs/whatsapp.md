@@ -33,7 +33,7 @@ El mismo sobre que manda Meta: `object: "whatsapp_business_account"` → `entry[
 Con `POST /api/wa/v21.0/{handle}/messages`:
 
 - `text`
-- `image`, `video`, `document` y `audio` con `link` (https público). Un `video` puede ser MP4, WebM o MOV de hasta 16 MB, con `caption`. Un `document` puede ser PDF, Word, Excel, PowerPoint, OpenOffice, TXT o CSV, según la extensión de `filename` (si no viene, se toma la del `link`), y un `audio`, OGG/Opus, MP3, M4A o WebM; se ve como un mensaje de voz. Los archivos subidos por `id` todavía no.
+- `image`, `video`, `document` y `audio` con `link` (https público, con un dominio y sin usuario ni clave adentro; lo mismo vale para la `url` de un `cta_url`, ver "Cómo tiene que ser un link" en [Conectar el bot de un negocio](conectar-un-bot.md)). Un `video` puede ser MP4, WebM o MOV de hasta 16 MB, con `caption`. Un `document` puede ser PDF, Word, Excel, PowerPoint, OpenOffice, TXT o CSV, según la extensión de `filename` (si no viene, se toma la del `link`), y un `audio`, OGG/Opus, MP3, M4A o WebM; se ve como un mensaje de voz. Los archivos subidos por `id` todavía no.
 - `location`
 - `interactive` de tipo `button` (hasta 3 botones de respuesta), `list`, `cta_url` (botón con link) y `location_request_message` (botón "Mandar mi ubicación", con `action.name: "send_location"`; la respuesta llega como `location` con `context`). El encabezado solo puede ser de texto.
 - `status: "read"` con `message_id` para marcar leído, y con `typing_indicator: {"type":"text"}` para mostrar "escribiendo…".
