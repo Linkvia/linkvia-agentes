@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Hablar con el equipo de Linkvia (WhatsApp)
+    url: https://wa.me/5493541592344
+    about: Para algo de tu cuenta, de tu negocio o que no querés que sea público.
+  - name: Seguridad
+    url: https://wa.me/5493541592344
+    about: Si encontraste una falla de seguridad, avisanos por privado y no abras un issue público.
