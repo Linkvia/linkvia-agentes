@@ -95,6 +95,6 @@ No. El mismo agente puede atender en los tres lados; cambia solo la capa que hab
 
 ## Ayuda
 
-¿Encontraste un error en la documentación o te falta un ejemplo? [Abrí un issue](../../issues). Para lo demás, escribinos por [WhatsApp](https://wa.me/5493541592344) al +54 9 3541 59-2344.
+¿Encontraste un error en la documentación, en el SDK o en Linkvia, o te falta algo para tu agente? [Abrí un issue](../../issues/new/choose) (hay plantillas para cada caso). Para lo demás, escribinos por [WhatsApp](https://wa.me/5493541592344) al +54 9 3541 59-2344.
 
 Los ejemplos de este repositorio tienen licencia MIT: copialos y usalos en tus proyectos, también comerciales.
