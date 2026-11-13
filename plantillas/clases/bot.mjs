@@ -35,12 +35,12 @@ function proximas() {
   return salida.sort((x, y) => instante(x.fecha, x.c.hora) - instante(y.fecha, y.c.hora));
 }
 
-const menu = (saludo = config.bienvenida) =>
-  botones(saludo, [
-    ["reservar", "Reservar una clase"],
-    ["mis", "Mis clases"],
-    ["mas", "Cuota y más"],
-  ]);
+const OPCIONES = [
+  ["reservar", "Reservar una clase"],
+  ["mis", "Mis clases"],
+  ["mas", "Cuota y más"],
+];
+const menu = (saludo = config.bienvenida) => botones(saludo, OPCIONES);
 
 function elegirClase() {
   const filas = proximas()
@@ -210,4 +210,4 @@ const rutasPanel = panel({
   },
 });
 
-iniciar({ responder, cadaMinuto, rutas: { "POST /mercadopago": rutaAvisos(cuotaPagada), ...rutasPanel } });
+iniciar({ responder, cadaMinuto, atajos: OPCIONES, rutas: { "POST /mercadopago": rutaAvisos(cuotaPagada), ...rutasPanel } });

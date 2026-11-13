@@ -35,12 +35,12 @@ function abierto() {
 }
 const horarioDeHoy = () => (config.horario?.[diaSemana(fechaLocal())] || []).map(([d, h]) => `${d} a ${h}`).join(" y ") || "hoy no abrimos";
 
-const menuPrincipal = (saludo = config.bienvenida) =>
-  botones(saludo, [
-    ["pedir", "Hacer un pedido"],
-    ["estado", "Mi pedido"],
-    ["humano", "Hablar con alguien"],
-  ]);
+const OPCIONES = [
+  ["pedir", "Hacer un pedido"],
+  ["estado", "Mi pedido"],
+  ["humano", "Hablar con alguien"],
+];
+const menuPrincipal = (saludo = config.bienvenida) => botones(saludo, OPCIONES);
 
 function categorias() {
   if (!abierto()) return [texto(`Ahora estamos cerrados. Hoy atendemos de ${horarioDeHoy()}. ¡Te esperamos!`)];
@@ -202,7 +202,8 @@ async function confirmar(evento) {
 const ESTADO_TARJETA = { eligiendo_pago: "pending", esperando_pago: "pending", preparando: "preparing", entregado: "delivered", cancelado: "cancelled" };
 
 function tarjeta(p) {
-  let status = ESTADO_TARJETA[p.estado] || (p.pago === "pagado" ? "paid" : "pending");
+  // Uno que se paga al recibir ya está en la cocina: no muestra "Falta pagar".
+  let status = ESTADO_TARJETA[p.estado] || (p.pago === "pagado" ? "paid" : p.estado === "nuevo" ? "preparing" : "pending");
   if (p.estado === "listo") status = p.entrega === "delivery" ? "onTheWay" : "preparing";
   const notas = [
     p.entrega === "delivery" ? `Delivery, en unos ${config.delivery.demoraMinutos} minutos.` : `Retirás en ${config.retiro.direccion}.`,
@@ -382,4 +383,4 @@ const rutasPanel = panel({
   },
 });
 
-iniciar({ responder, cadaMinuto, rutas: { "POST /mercadopago": rutaAvisos(pagado), ...rutasPanel } });
+iniciar({ responder, cadaMinuto, atajos: OPCIONES, rutas: { "POST /mercadopago": rutaAvisos(pagado), ...rutasPanel } });
