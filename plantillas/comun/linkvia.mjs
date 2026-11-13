@@ -71,8 +71,11 @@ export async function editar(messageId, action) {
  * - rutas: otras direcciones, por ejemplo { "POST /mercadopago": fn, "GET /panel": fn }.
  *   Cada fn recibe { url, cuerpo, headers } y devuelve { status?, tipo?, cuerpo?, headers? }.
  * - cadaMinuto(): tareas que corren solas (recordatorios, vencimientos).
+ * - atajos: [[id, título], ...] del menú principal. Si el negocio todavía no cargó su menú de atajos,
+ *   se cargan al arrancar con los mismos ids que los botones, así el bot los entiende igual.
  */
-export function iniciar({ responder, rutas = {}, cadaMinuto }) {
+export function iniciar({ responder, rutas = {}, cadaMinuto, atajos }) {
+  if (atajos?.length) void cargarAtajos(atajos);
   if (!SECRETO) {
     console.error("Falta LINKVIA_WEBHOOK_SECRET. Lo da el panel de Linkvia al registrar el negocio.");
     process.exit(1);
@@ -125,6 +128,30 @@ export function iniciar({ responder, rutas = {}, cadaMinuto }) {
     setTimeout(tarea, 2_000);
   }
   return servidor;
+}
+
+/**
+ * Carga el menú de atajos del agente (el botón al lado del campo de texto y, en el chat vacío, los
+ * primeros 4 como botones) si el negocio no tiene ninguno. Si el dueño ya armó el suyo, no lo toca.
+ */
+export async function cargarAtajos(atajos) {
+  if (!CLAVE_API) return false;
+  try {
+    const headers = { authorization: `Bearer ${CLAVE_API}`, "content-type": "application/json" };
+    const actual = await fetch(`${API}/business`, { headers });
+    if (!actual.ok) return false;
+    if ((await actual.json()).shortcuts?.length) return true;
+    const r = await fetch(`${API}/business/shortcuts`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ shortcuts: atajos.slice(0, 10).map(([id, title]) => ({ id, title: corto(title, 24) })) }),
+    });
+    if (!r.ok) console.warn(`Linkvia respondió ${r.status} al cargar el menú de atajos.`);
+    return r.ok;
+  } catch (e) {
+    console.warn("No pude cargar el menú de atajos:", e.message);
+    return false;
+  }
 }
 
 /** Atajos para armar acciones sin pasarse de los límites de Linkvia. */

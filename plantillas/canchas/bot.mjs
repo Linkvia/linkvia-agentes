@@ -31,12 +31,12 @@ function libres(dep, fecha) {
   });
 }
 
-const menu = (saludo = config.bienvenida) =>
-  botones(saludo, [
-    ["reservar", "Reservar cancha"],
-    ["mis", "Mis reservas"],
-    ["humano", "Hablar con alguien"],
-  ]);
+const OPCIONES = [
+  ["reservar", "Reservar cancha"],
+  ["mis", "Mis reservas"],
+  ["humano", "Hablar con alguien"],
+];
+const menu = (saludo = config.bienvenida) => botones(saludo, OPCIONES);
 
 function elegirDeporte() {
   const ids = Object.keys(config.deportes);
@@ -254,4 +254,4 @@ const rutasPanel = panel({
   },
 });
 
-iniciar({ responder, cadaMinuto, rutas: { "POST /mercadopago": rutaAvisos(senaPagada), ...rutasPanel } });
+iniciar({ responder, cadaMinuto, atajos: OPCIONES, rutas: { "POST /mercadopago": rutaAvisos(senaPagada), ...rutasPanel } });

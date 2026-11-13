@@ -17,6 +17,7 @@ Los precios son orientativos (octubre de 2026). Un local chico entra en el plan 
 - `config.json`: todo lo del negocio (nombre, servicios, horarios, precios, seña). Para un cliente nuevo, en general alcanza con cambiar este archivo.
 - `README.md`: qué hace, cómo se ve la charla y cómo venderlo.
 - Un **panel web** mínimo en `/panel` para que el negocio vea lo que entró y toque botones (seña pagada, pedido listo, cuota paga).
+- **Menú de atajos** listo: al arrancar, si el negocio todavía no cargó el suyo, el agente carga las opciones de su menú principal como atajos (con los mismos ids que sus botones, así los entiende igual). En el chat vacío, el cliente las ve como botones para empezar. Si el dueño arma su propio menú en el panel, no se toca.
 - **Cobro con Mercado Pago** de la cuenta del propio negocio: con link fijo o automático. Ver [cobrar con Mercado Pago](../docs/cobrar-con-mercado-pago.md).
 
 La carpeta [`comun/`](comun/) tiene lo que comparten: la firma de Linkvia, el envío de avisos, el cálculo de horarios, los cobros, el panel y un simulador para probar sin Linkvia.

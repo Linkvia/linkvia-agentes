@@ -29,12 +29,12 @@ function libres(serv, fecha) {
   });
 }
 
-const menu = (saludo = config.bienvenida) =>
-  botones(saludo, [
-    ["turno", "Sacar turno"],
-    ["mis", "Mis turnos"],
-    ["humano", "Hablar con alguien"],
-  ]);
+const OPCIONES = [
+  ["turno", "Sacar turno"],
+  ["mis", "Mis turnos"],
+  ["humano", "Hablar con alguien"],
+];
+const menu = (saludo = config.bienvenida) => botones(saludo, OPCIONES);
 
 function elegirServicio() {
   return [
@@ -251,4 +251,4 @@ const rutasPanel = panel({
   },
 });
 
-iniciar({ responder, cadaMinuto, rutas: { "POST /mercadopago": rutaAvisos(senaPagada), ...rutasPanel } });
+iniciar({ responder, cadaMinuto, atajos: OPCIONES, rutas: { "POST /mercadopago": rutaAvisos(senaPagada), ...rutasPanel } });
