@@ -11,7 +11,7 @@ Desde el panel de negocios ([negocios.linkvia.com.ar](https://negocios.linkvia.c
 ```bash
 curl -X POST https://app.linkvia.com.ar/api/businesses -H 'content-type: application/json' -d '{
   "handle": "pizzeria",
-  "name": "Pizzería Don Luis",
+  "name": "Pizzería La Vizcacha Dorada",
   "description": "Pizzas a la piedra",
   "webhookUrl": "https://tu-bot.com/linkvia",
   "cuit": "20-12345678-6"
