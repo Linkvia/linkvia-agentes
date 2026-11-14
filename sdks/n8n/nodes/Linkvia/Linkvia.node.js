@@ -61,6 +61,7 @@ class Linkvia {
           typeOptions: { rows: 3 },
           required: true,
           default: "",
+          placeholder: "Hoy hay tarta de ricota de la abuela Teté hasta las 20",
           description: "Admite *negrita*, _cursiva_ y Markdown",
           displayOptions: show("sendText", "edit"),
         },

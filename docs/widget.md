@@ -117,7 +117,7 @@ Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta*
 ## Privacidad
 
 - Tu bot sabe desde qué página le escriben: recibe en cada mensaje la página donde está el widget, solo el dominio y la ruta (`https://tuweb.com/carta`), y tu `data-ref` si lo pusiste. Lo que va después de `?` o `#` no se manda nunca, porque ahí suele haber datos personales o de campañas. El iframe se abre con `no-referrer`, así el navegador tampoco manda la dirección completa. No pongas datos de la persona en la ruta ni en `data-ref`.
-- La página y el `data-ref` los informa el navegador de la persona, así que alguien los puede falsear. Usalos para dar contexto ("veo que estás mirando la cabaña Los Pinos"), no para dar permisos ni precios especiales.
+- La página y el `data-ref` los informa el navegador de la persona, así que alguien los puede falsear. Usalos para dar contexto ("veo que estás mirando la cabaña El Tero Pensativo"), no para dar permisos ni precios especiales.
 - Tu web no ve nada de la charla ni de la persona: el chat vive en el dominio de Linkvia y el navegador lo separa de tu página. Tu agente recibe lo mismo que en la app: el seudónimo y solo los datos que la persona aceptó compartir.
 - Solo la vista del chat (`/@negocio?embed=1`) se puede mostrar dentro de otra web; el resto de la app y el panel, no.
 - Si tu agente es privado (panel → **Acceso**), el widget abre el chat solo para quien ya es miembro: a los demás les llega el link de invitación, no el widget.
