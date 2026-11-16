@@ -15,6 +15,9 @@ Uso típico, sin instalar nada más (solo Python 3.9 o más nuevo):
 
 Con Flask, FastAPI o Django se usa ``bot.handle(cuerpo_crudo, encabezado_de_firma, responder)``,
 que devuelve el código HTTP y el cuerpo de la respuesta.
+
+Si el cliente escribe "¿les queda budín de mistol para el sábado?", ``evento["message"]["text"]``
+trae ese texto tal cual, sin el teléfono ni el nombre: esos llegan solo si el cliente los compartió.
 """
 
 from __future__ import annotations
