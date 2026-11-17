@@ -18,7 +18,7 @@ Si tu web está en WordPress, Tienda Nube, Wix u otro armador: buscá la opción
 
 El widget está hecho para no tocar la velocidad de tu sitio ni tu puntaje de PageSpeed:
 
-- Pesa menos de 4 KB comprimido (un test lo controla en cada cambio: el límite es 5 KB).
+- Pesa menos de 6 KB comprimido (un test lo controla en cada cambio: el límite es 5,75 KB).
 - Se carga con `async`: nunca frena el resto de la página. Se dibuja cuando el navegador está libre.
 - No usa librerías, fuentes ni imágenes de afuera: los íconos van dentro del mismo archivo.
 - El chat (la app de Linkvia en un iframe) se carga recién cuando la persona toca el botón. Antes de eso no hay ningún pedido a Linkvia, ni cookies, ni nada guardado en el navegador. Al pasar el mouse por el botón el navegador prepara la conexión, así abre más rápido.
@@ -65,6 +65,7 @@ Todas son atributos `data-` del `<script>`. Solo `data-handle` es obligatorio.
 | `data-greet` | En el globito: un mensaje que aparece al lado del botón, como si te escribiera el negocio (hasta 200 letras). Va una vez por página y se va si la persona lo cierra; si lo toca, se abre el chat. No se guarda ni le llega a tu bot | `¿Te ayudo a elegir?` |
 | `data-greet-after` | Cuántos segundos espera para mostrarlo, de 0 a 600 (10 por defecto) | `20` |
 | `data-greet-path` | Solo en esa página y las de adentro (`/menu` vale para `/menu/pizzas`, no para `/menues`). Sin esto, en todas | `/menu` |
+| `data-notify` | En el globito, `on`: si la persona cerró el chat y le respondés, el botón muestra cuántos mensajes nuevos tiene y "Nuevo mensaje de" quien respondió (tu agente o la persona del equipo). El texto del mensaje no se muestra. Apagado por defecto; en el panel se prende con **Avisar los mensajes nuevos con el chat cerrado** | `on` |
 | `data-preset` | Estilo listo: `linkvia` (por defecto) o `whatsapp` (ícono de teléfono, verde `#25D366`) | `whatsapp` |
 | `data-color` | Color del botón: `#rrggbb`, `rgb(...)`, `hsl(...)` o un nombre | `#ff6b4a` |
 | `data-icon-color` | Color del ícono (blanco por defecto) | `#111b21` |
@@ -73,6 +74,8 @@ Todas son atributos `data-` del `<script>`. Solo `data-handle` es obligatorio.
 | `data-size` | Tamaño del globito en píxeles, de 40 a 96 (60 por defecto) | `56` |
 | `data-offset` | Distancia al borde, en píxeles (20 por defecto). También `data-offset-x` y `data-offset-y` | `24` |
 | `data-width`, `data-height` | Tamaño del panel (globito) o del chat (inline). En px, %, vh, vw o rem | `420`, `70vh` |
+| `data-launcher-text` | En el globito: un texto al lado del ícono y el botón pasa a ser alargado, como una pastilla (hasta 30 letras). Con el chat abierto vuelve a ser la cruz redonda | `Pedí por chat` |
+| `data-launcher` | En el globito, `none`: no se dibuja el botón y el chat se abre solo desde tu web (ver "Abrirlo desde tu página"). Con el chat abierto aparece la cruz para cerrarlo | `none` |
 | `data-label` | Lo que lee un lector de pantalla y el cartelito al pasar el mouse | `Pedí por chat` |
 
 Un mensaje automático a los 20 segundos en la carta:
@@ -81,11 +84,26 @@ Un mensaje automático a los 20 segundos en la carta:
 <script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-greet="¿Te ayudo a elegir?" data-greet-after="20" data-greet-path="/menu" async></script>
 ```
 
+Un botón con texto, que se entiende sin mirar el ícono:
+
+```html
+<script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-launcher-text="Pedí por chat" async></script>
+```
+
+Si tu web ya tiene su botón "Hacé tu pedido", sin globito: el chat se abre desde ese botón con `linkvia:open`.
+
+```html
+<script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-launcher="none" async></script>
+<button onclick="document.dispatchEvent(new CustomEvent('linkvia:open'))">Hacé tu pedido</button>
+```
+
 Un ejemplo con todo al estilo del botón de WhatsApp, a la izquierda y un poco más chico:
 
 ```html
 <script src="https://app.linkvia.com.ar/widget.js" data-handle="pizzeria" data-preset="whatsapp" data-position="left" data-size="52" async></script>
 ```
+
+En el globito, el menú del chat (⋮) tiene **Ampliar ventana**: el panel se agranda hasta casi toda la pantalla, y **Achicar ventana** lo vuelve a su tamaño. Quien chatea sin cuenta también puede **Buscar en la conversación** y **Descargar conversación** (un .txt en su equipo).
 
 Si ponés un ícono propio con `data-icon`, esa imagen se baja al cargar la página (es la única excepción a "nada antes del clic"); conviene que sea un SVG chico. Un valor que no se entiende (un color mal escrito, por ejemplo) se ignora y queda el de por defecto.
 
@@ -118,6 +136,6 @@ Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta*
 
 - Tu bot sabe desde qué página le escriben: recibe en cada mensaje la página donde está el widget, solo el dominio y la ruta (`https://tuweb.com/carta`), y tu `data-ref` si lo pusiste. Lo que va después de `?` o `#` no se manda nunca, porque ahí suele haber datos personales o de campañas. El iframe se abre con `no-referrer`, así el navegador tampoco manda la dirección completa. No pongas datos de la persona en la ruta ni en `data-ref`.
 - La página y el `data-ref` los informa el navegador de la persona, así que alguien los puede falsear. Usalos para dar contexto ("veo que estás mirando la cabaña El Tero Pensativo"), no para dar permisos ni precios especiales.
-- Tu web no ve nada de la charla ni de la persona: el chat vive en el dominio de Linkvia y el navegador lo separa de tu página. Tu agente recibe lo mismo que en la app: el seudónimo y solo los datos que la persona aceptó compartir.
+- Tu web no ve los mensajes ni a la persona: el chat vive en el dominio de Linkvia y el navegador lo separa de tu página. Si prendés `data-notify`, tu web se entera de cuándo llega una respuesta y del nombre de quien respondió, nunca del texto. Tu agente recibe lo mismo que en la app: el seudónimo y solo los datos que la persona aceptó compartir.
 - Solo la vista del chat (`/@negocio?embed=1`) se puede mostrar dentro de otra web; el resto de la app y el panel, no.
 - Si tu agente es privado (panel → **Acceso**), el widget abre el chat solo para quien ya es miembro: a los demás les llega el link de invitación, no el widget.
