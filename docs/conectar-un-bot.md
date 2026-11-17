@@ -39,7 +39,7 @@ Al registrarlo, el responsable del negocio acepta los [Términos para negocios](
 
 ## 2. Recibir eventos
 
-Linkvia hace `POST` al webhook con un JSON y espera la respuesta en menos de 10 segundos.
+Linkvia hace `POST` al webhook con un JSON y espera la respuesta en menos de 10 segundos y de hasta 1 MB (lo mismo que acepta `POST /bot/v0/messages`; una respuesta más grande se toma como un error del bot).
 
 **Mensaje del usuario** (`type: "message"`): trae el texto, un id de usuario seudónimo (distinto para cada negocio) y en `user.sharedData` solo los datos que el usuario aceptó compartir: `name`, `phone`, `email` y `address`. El historial de pedidos (`orderHistory`) todavía no se completa. Si el usuario respondió citando un mensaje anterior, `message.replyTo` trae ese mensaje: `{ id, from: "user" | "bot", text }`. Los mensajes que no son texto (catálogo, pedido de datos) llegan resumidos en `text`.
 
@@ -120,7 +120,7 @@ curl 'https://app.linkvia.com.ar/api/bot/v0/updates?offset=0&timeout=25' -H 'aut
 ```
 
 - Llegan los mismos eventos que a un webhook (salvo `ping`), en orden y con el contrato de Linkvia (no el formato de WhatsApp), hasta 100 por pedido.
-- Solo con la clave de API: una sesión del panel recibe 403.
+- Solo con la clave de API: una sesión del panel recibe 403. Vale para toda la API del bot (`/bot/v0/*`): desde noviembre de 2026, la sesión del panel (`lvp_…`) no sirve para leer ni escribir charlas por acá; usá la clave del negocio o la de tu cuenta de gestor (`lvg_…` con `linkvia-agent`).
 - "Probar conexión" y el monitoreo andan si el bot pidió en los últimos 10 minutos. Si deja de pedir, el negocio recibe el aviso de "tu bot no responde", como con un webhook caído.
 - `timeout` (segundos, hasta 25): si no hay nada, Linkvia espera a que llegue algo antes de responder. Usalo siempre: pedir sin esperar más de 30 veces por minuto responde 429.
 - `offset`: confirma lo anterior. Pedí de nuevo con el último `updateId` + 1 y lo confirmado se borra; sin confirmar, vuelve a venir.
@@ -184,7 +184,7 @@ También se entiende el Markdown que escriben los modelos de IA, así no hace fa
 
 **Botones, listas y tarjetas**, como los mensajes interactivos de WhatsApp Business:
 
-- `buttons` lleva de 1 a 3 botones de respuesta rápida. `list` abre una lista de hasta 10 opciones en total, agrupadas en `sections`; `button` es lo que dice el botón que la abre. `carousel` lleva de 1 a 10 tarjetas que se deslizan, cada una con `title`, y opcionalmente `description`, `imageUrl` (se baja como las fotos; si falla, la tarjeta va sin foto) y hasta 2 `buttons` o un `link`.
+- `buttons` lleva de 1 a 3 botones de respuesta rápida. `list` abre una lista de hasta 10 opciones en total, agrupadas en `sections`; `button` es lo que dice el botón que la abre. `carousel` lleva de 1 a 10 tarjetas que se deslizan, cada una con `title`, y opcionalmente `description`, `imageUrl` (se baja como las fotos; si falla, la tarjeta va sin foto) y hasta 2 `buttons` o un `link`. Las fotos de las tarjetas cuentan para el tope de 10 fotos, videos, audios o archivos por respuesta: con `POST /bot/v0/messages` pasarlo da 400, y en una respuesta al webhook el carrusel que lo pasa sale sin fotos (desde noviembre de 2026).
 - `buttons`, `list` y `link` aceptan además `header` (título en negrita) y `footer` (nota gris). Los textos largos se recortan: 24 caracteres los botones y opciones, 72 la descripción de una opción, 60 el header y el footer, 1024 el texto.
 - Cuando el usuario toca un botón o elige una opción, llega un mensaje común con `text` igual al título de la opción, `replyTo` con el mensaje de los botones y `message.choice: { id, title }` con el `id` que le pusiste. Conviene decidir por `choice.id` y no por el texto. Abrir la lista no manda nada.
 - **Menú de atajos** (como los comandos de Telegram o Discord): el negocio carga de 1 a 10 atajos en el panel (**Tu bot → Menú de atajos**) o con `PUT /business/shortcuts`. En el chat aparece un botón al lado del campo de texto que los muestra con su descripción (también se abren escribiendo `/` en la caja, y lo que sigue a la barra los filtra; el bot nunca recibe la `/`), y en el chat vacío los primeros 4 se ven como botones debajo del nombre del agente, para el primer mensaje (en el orden en que los cargaste: poné primero los más usados); tocar uno manda un mensaje común con `text` igual al título y `message.choice: { id, title, kind: "shortcut" }`, sin `replyTo`. Así el bot no aprende nada nuevo: si ya decide por `choice.id`, conviene usar los mismos ids que en sus botones (por ejemplo `menu` o `humano`). Con el formato de WhatsApp llega como `button_reply`.
@@ -343,7 +343,7 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/stream/<messageId>/end \
 
 ## 6. Panel del negocio
 
-En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con la sesión del panel (`lvp_…`) si el dueño entró con su mail:
+En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con la sesión del panel (`lvp_…`) si el dueño entró con su mail (solo estas rutas del panel; la API del bot de las secciones anteriores es solo con la clave):
 
 | Ruta | Qué hace |
 | --- | --- |
