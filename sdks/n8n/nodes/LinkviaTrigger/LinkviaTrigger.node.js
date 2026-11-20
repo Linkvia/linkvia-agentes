@@ -13,6 +13,7 @@ const EVENTS = [
   { name: "Devolución de una persona (handback)", value: "handback" },
   { name: "Aviso aceptado o rechazado (notice)", value: "notice" },
   { name: "Entregado o leído (status)", value: "status" },
+  { name: "Qué pasó con una difusión (broadcast)", value: "broadcast" },
   { name: "Pedido de borrar datos (dataDeletion)", value: "dataDeletion" },
   { name: "Contacto agendado o bloqueado (contact)", value: "contact" },
   { name: "Charla vaciada (cleared)", value: "cleared" },

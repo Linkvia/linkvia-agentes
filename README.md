@@ -59,6 +59,10 @@ Próximamente: plantillas para Make y Botpress, y un ejemplo con un modelo de IA
 
 Armá un agente una vez y vendéselo a muchos negocios iguales por una cuota mensual. Un local chico entra en el plan Free de Linkvia, así que lo que cobrás es casi todo margen. Empezá por una [plantilla](plantillas/): cambiás el `config.json` con los datos del negocio, lo probás con el simulador y lo conectás. Si querés que tu agente aparezca en la [Agent Store](https://www.linkvia.com.ar/agent-store.html), escribinos. Más en [Ganá dinero con tus agentes](https://www.linkvia.com.ar/emprendedores.html).
 
+## Difusiones desde tu sistema
+
+El negocio puede mandar un mismo mensaje (una promo, una novedad) a los clientes que ya le escribieron, desde su CRM, su tienda o una planilla: pide el grupo en palabras ("los que compraron el último mes"), ve el alcance y la manda con su clave de API, si el dueño lo habilitó en el panel. Con el evento `broadcast`, su sistema se entera de quién la recibió, la leyó, contestó o se dio de baja. Siempre con los frenos de Linkvia: solo a quien escribió, una por semana, en silencio, nunca de noche y con baja a un toque. Detalle en [docs/conectar-un-bot.md](docs/conectar-un-bot.md#difusiones-desde-tu-sistema).
+
 ## Cómo funciona, en un vistazo
 
 ```

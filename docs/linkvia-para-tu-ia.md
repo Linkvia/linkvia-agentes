@@ -67,10 +67,11 @@ Campos comunes: `contractVersion`, `type`, `eventId`, `business: { handle }`; `r
 - `buttonTap`: el cliente tocó un botón con `silent: true` (no escribe nada en el chat). Trae `buttonTap: { messageId, id, title }`. Responder `{"contractVersion":"0","actions":[],"toast":"Agregado ✓"}` (el `toast` se ve un momento) y, si hace falta, editar el mensaje del botón.
 - `notice`: el cliente aceptó, rechazó o canceló un aviso ofrecido con la acción `notice`. Trae `notice: { id, title, status: "accepted" | "declined" | "cancelled", expiresAt? }`.
 - `status`: tildes para el bot, como los `statuses` de WhatsApp. Trae `status: { messageIds, status: "delivered" | "read", at }`. Llega solo si el negocio lo activó (`PATCH /business` `{"statusEvents": true}`).
+- `broadcast`: qué pasó con una difusión del negocio. Trae `broadcast: { id?, status: "delivered" | "read" | "replied" | "optedOut" | "optedIn", at }` (`replied` = primera respuesta en la semana después de recibirla; `optedOut` = tocó "No recibir más"; `id` es el que devolvió `POST /business/broadcast`). Llega solo si el negocio lo activó (`PATCH /business` `{"broadcastEvents": true}`) y nunca en el formato de WhatsApp.
 - `contact` (`contact: { status: "added" | "removed" | "blocked" | "unblocked" }`), `cleared` (vació el chat: borrar la memoria de la charla) y `streamStopped` (tocó **Detener** en una respuesta de a partes; trae `stream: { messageId, text }`: cortar el modelo). Llegan solo si el negocio lo activó (`PATCH /business` `{"chatEvents": true}`).
 - `dataDeletion`: el cliente borró sus datos con el agente. Trae `user: { id }` y `conversations` (ids borradas). **Borrar todo lo guardado de ese `user.id`** (Ley 25.326). Llega siempre.
 
-`consent`, `reaction`, `start`, `handback`, `buttonTap`, `notice`, `status`, `contact`, `cleared`, `streamStopped` y `dataDeletion` son de mejor esfuerzo: si el bot falla o no los conoce, no cuenta como caída. Un bot que no los usa puede responder `actions: []`. En `status`, `contact`, `cleared`, `streamStopped` y `dataDeletion` lo que se responda no se muestra.
+`consent`, `reaction`, `start`, `handback`, `buttonTap`, `notice`, `status`, `broadcast`, `contact`, `cleared`, `streamStopped` y `dataDeletion` son de mejor esfuerzo: si el bot falla o no los conoce, no cuenta como caída. Un bot que no los usa puede responder `actions: []`. En `status`, `broadcast`, `contact`, `cleared`, `streamStopped` y `dataDeletion` lo que se responda no se muestra.
 
 ## Respuesta del webhook
 
@@ -121,6 +122,17 @@ Base `https://app.linkvia.com.ar/api`, encabezados `authorization: Bearer <LINKV
 | `POST /bot/v0/stream` | `{ conversationId }` | Empezar una respuesta de a partes. Devuelve `{ messageId }` |
 | `POST /bot/v0/stream/{messageId}` | `{ text }` | Sumar texto al final (mandar cada 100 a 300 ms, no por token). Si responde `stopped: true`, el cliente tocó Detener: cortar el modelo |
 | `POST /bot/v0/stream/{messageId}/end` | `{}` o `{ text }` | Terminarla. Con `text`, ese reemplaza todo. Sin nada en 60 s se cierra sola |
+
+### Difusiones (un mismo mensaje a los clientes que ya escribieron)
+
+Solo con la clave si el dueño prendió "Mandar difusiones con la clave de API" en el panel (si no, 403; un negocio sin dueño no lo necesita). Primero el alcance, después el envío al `audience` que devolvió el alcance:
+
+| Método y ruta | Cuerpo | Para qué |
+|---|---|---|
+| `POST /business/broadcast/reach` | `{ audience: "los que compraron el último mes en Carlos Paz" }` | Cómo entendió el grupo (`audience`, `description`), cuántos entran (`total`) y cuántos la reciben (`active`). Nunca trae teléfonos. 20 por hora |
+| `POST /business/broadcast` | `{ audience: {...}, text }` | Mandarla. Devuelve `{ id, count, scheduledFor? }` |
+
+Topes: una por semana a cada persona y 2 por semana por negocio (menos si muchos se dan de baja; 429). Solo personas que alguna vez le escribieron al negocio: no se suben listas. Llegan marcadas "Difusión", sin sonido y con "No recibir más" a un toque. De 0 a 10 (hora de Argentina) quedan en cola y salen a las 10 (`scheduledFor`). Para seguirlas, el evento `broadcast`.
 
 ## Patrón para agentes de IA que tardan más de 10 segundos
 
