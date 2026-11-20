@@ -226,6 +226,17 @@ class SinServidor(unittest.TestCase):
         self.assertEqual(api.calls[1][3]["actions"], [{"type": "text", "text": "Recibí: hola"}])
         self.assertEqual(api.calls[2][:2], ("GET", "https://linkvia.test/api/bot/v0/updates?offset=8&timeout=5"))
 
+    def test_poll_no_contesta_a_un_evento_broadcast(self):
+        evento = {"type": "broadcast", "conversation": {"id": "conv-1"}, "broadcast": {"id": "d1", "status": "read", "at": "2026-11-20T13:00:00Z"}}
+        api = FakeApi(
+            (200, json.dumps({"contractVersion": "0", "updates": [{"updateId": 3, "event": evento}]}).encode()),
+            (200, b'{"contractVersion": "0", "updates": []}'),
+        )
+        bot = LinkviaBot(api_key="lv_x", api_url="https://linkvia.test/api", transport=api)
+        vueltas = []
+        bot.poll(lambda e: "respuesta", timeout=5, stop=lambda: vueltas.append(1) or len(vueltas) > 2)
+        self.assertEqual([c[1] for c in api.calls if c[0] == "POST"], [])
+
     def test_sin_secreto_no_recibe_webhooks(self):
         bot = LinkviaBot(api_key="lv_x", api_url="https://linkvia.test/api", transport=FakeApi())
         with self.assertRaises(LinkviaError):

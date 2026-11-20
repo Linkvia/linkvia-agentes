@@ -440,7 +440,8 @@ class LinkviaBot:
                     if isinstance(reply, Toast):
                         reply = reply.reply
                     conversation = event.get("conversation") or {}
-                    if to_actions(reply) and conversation.get("id"):
+                    # Como con el webhook, lo que se responde a un evento `broadcast` no se muestra: no se manda.
+                    if to_actions(reply) and conversation.get("id") and event.get("type") != "broadcast":
                         self.send(conversation["id"], reply)
                 except Exception as err:  # noqa: BLE001 (un evento que falla no corta el loop)
                     print(f"[linkvia] El bot falló con un evento {event.get('type')}: {err}")

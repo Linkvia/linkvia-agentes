@@ -119,14 +119,14 @@ También están `linkvia:close` y `linkvia:toggle`. Si tenés más de un widget 
 
 ## Chatear sin cuenta (invitados)
 
-Viene prendido: la gente te puede escribir desde tu web sin entrar con el celular. Si preferís que siempre entren con su celular, apagalo en el panel: **Compartir → Chatear sin cuenta desde tu web**.
+Viene prendido: la gente te puede escribir desde tu web sin entrar con el celular. También vale para tu link (`/@tu-negocio`) y tu QR: quien lo abre sin tener cuenta en Linkvia elige **Chatear sin cuenta** o **Entrar con mi celular**, y como invitado ve solo tu chat. Si preferís que siempre entren con su celular, apagalo en el panel: **Compartir → Chatear sin cuenta desde tu web, tu link o tu QR**.
 
 Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta** (marca que tiene 18 años o más y acepta los Términos) o **Entrar con mi celular**.
 
 - Como invitado puede escribir, tocar botones y usar el menú de atajos, y la atiende tu bot o alguien de tu equipo desde Atención.
 - No puede mandar fotos, audios, archivos ni ubicación, ni compartir datos (no hay teléfono ni perfil), ni aceptar avisos. Si tu bot le pide datos, le aparece "Para compartir tus datos, entrá con tu celular".
-- Queda guardado solo en ese navegador y solo para tu negocio: no sirve para hablar con otros agentes.
-- Si después entra con su celular desde el widget, la charla pasa a su cuenta y tu negocio queda en su lista de chats. Si ya tenía un chat con vos, sigue en ese.
+- Queda guardado solo en ese navegador y solo para tu negocio: no sirve para hablar con otros agentes. Un link de invitación a un agente privado siempre pide entrar con el celular.
+- Si después entra con su celular (desde el widget o desde la app), la charla pasa a su cuenta y tu negocio queda en su lista de chats. Si ya tenía un chat con vos, sigue en ese.
 - En Atención aparece como "Invitado" con un código corto. Tu bot lo recibe con `user.guest: true` (ver [Conectar el bot de un negocio](conectar-un-bot.md)).
 - Cada charla cuenta para tu plan igual que en la app. Hay topes para que nadie lo use para molestarte: invitados nuevos por hora desde una misma conexión y por día en tu negocio, y mensajes por minuto y por día de cada invitado.
 - Un invitado que no vuelve en 90 días se borra con su charla.
