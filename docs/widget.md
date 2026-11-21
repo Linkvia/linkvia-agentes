@@ -132,6 +132,15 @@ Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta*
 - Un invitado que no vuelve en 90 días se borra con su charla.
 - Los agentes privados nunca aceptan invitados.
 
+## Seguir por WhatsApp
+
+Si te preocupa perder a quien no quiere otra app, podés ofrecer seguir la charla en el WhatsApp de tu negocio. Viene apagado: prendelo en el panel, **Compartir → Seguir por WhatsApp**, con el número de WhatsApp de tu negocio. Solo lo puede cambiar el dueño (con la clave de API sola no se puede, para que nadie mande a tus clientes al WhatsApp de otro), y cada cambio queda en el registro.
+
+- Aparece **Seguir por WhatsApp** arriba del campo de texto, en el widget de tu web y en el chat sin cuenta (tu link o tu QR abiertos por alguien sin cuenta). A quien ya usa la app de Linkvia con su cuenta no se le muestra.
+- Al tocarlo se abre tu WhatsApp con un mensaje listo: un saludo y lo último que la persona escribió (hasta 3 mensajes, recortados), así no repite todo. Lo que contestó tu agente no va. La persona lo puede cambiar antes de mandarlo.
+- En el panel ves cuántas personas lo tocaron este mes y el anterior (cada una cuenta una vez por día). Si son muchas, puede ser una señal de que algo del chat no convence: contanos.
+- Los agentes privados no lo muestran.
+
 ## Privacidad
 
 - Tu bot sabe desde qué página le escriben: recibe en cada mensaje la página donde está el widget, solo el dominio y la ruta (`https://tuweb.com/carta`), y tu `data-ref` si lo pusiste. Lo que va después de `?` o `#` no se manda nunca, porque ahí suele haber datos personales o de campañas. El iframe se abre con `no-referrer`, así el navegador tampoco manda la dirección completa. No pongas datos de la persona en la ruta ni en `data-ref`.
@@ -139,3 +148,4 @@ Con la llave prendida, al abrir el widget la persona elige **Chatear sin cuenta*
 - Tu web no ve los mensajes ni a la persona: el chat vive en el dominio de Linkvia y el navegador lo separa de tu página. Si prendés `data-notify`, tu web se entera de cuándo llega una respuesta y del nombre de quien respondió, nunca del texto. Tu agente recibe lo mismo que en la app: el seudónimo y solo los datos que la persona aceptó compartir.
 - Solo la vista del chat (`/@negocio?embed=1`) se puede mostrar dentro de otra web; el resto de la app y el panel, no.
 - Si tu agente es privado (panel → **Acceso**), el widget abre el chat solo para quien ya es miembro: a los demás les llega el link de invitación, no el widget.
+- **Seguir por WhatsApp** no le pasa nada a WhatsApp ni a Meta: el mensaje lo arma el navegador de la persona con lo que ella escribió y lo manda ella desde su WhatsApp. Linkvia solo cuenta cuántas veces se tocó el botón, sin guardar el texto ni el número de la persona.
