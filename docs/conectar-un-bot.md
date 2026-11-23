@@ -23,6 +23,7 @@ La respuesta trae dos credenciales que **solo se muestran esta vez**:
 | Credencial | Para qué |
 | --- | --- |
 | `apiKey` (`lv_…`) | Autenticar al negocio en el panel y al bot cuando escribe por su cuenta |
+| `botKey` (`lvb_…`), opcional | Solo para la API del bot. No viene en el alta: la crea el dueño cuando la necesita (ver "Una clave solo para el bot") |
 | `webhookSecret` (`whsec_…`) | Verificar que los eventos que llegan al webhook vienen de Linkvia |
 
 El webhook tiene que ser `https`. Para desarrollo se acepta `http://localhost` o `http://127.0.0.1`. Si tu bot no tiene una dirección pública (corre en tu compu, en un script o en una planilla), poné `"webhookUrl": "linkvia:sin-servidor"` y pedí los mensajes vos: ver "Bot sin servidor", en la sección 2.
@@ -122,7 +123,7 @@ curl 'https://app.linkvia.com.ar/api/bot/v0/updates?offset=0&timeout=25' -H 'aut
 ```
 
 - Llegan los mismos eventos que a un webhook (salvo `ping`), en orden y con el contrato de Linkvia (no el formato de WhatsApp), hasta 100 por pedido.
-- Solo con la clave de API: una sesión del panel recibe 403. Vale para toda la API del bot (`/bot/v0/*`): desde noviembre de 2026, la sesión del panel (`lvp_…`) no sirve para leer ni escribir charlas por acá; usá la clave del negocio o la de tu cuenta de gestor (`lvg_…` con `linkvia-agent`).
+- Solo con la clave de API: una sesión del panel recibe 403. Vale para toda la API del bot (`/bot/v0/*`): desde noviembre de 2026, la sesión del panel (`lvp_…`) no sirve para leer ni escribir charlas por acá; usá la clave del negocio, la clave del bot (`lvb_…`) o la de tu cuenta de gestor (`lvg_…` con `linkvia-agent`).
 - "Probar conexión" y el monitoreo andan si el bot pidió en los últimos 10 minutos. Si deja de pedir, el negocio recibe el aviso de "tu bot no responde", como con un webhook caído.
 - `timeout` (segundos, hasta 25): si no hay nada, Linkvia espera a que llegue algo antes de responder. Usalo siempre: pedir sin esperar más de 30 veces por minuto responde 429.
 - `offset`: confirma lo anterior. Pedí de nuevo con el último `updateId` + 1 y lo confirmado se borra; sin confirmar, vuelve a venir.
@@ -132,7 +133,7 @@ curl 'https://app.linkvia.com.ar/api/bot/v0/updates?offset=0&timeout=25' -H 'aut
 
 Con el SDK de Node es un loop: `await new LinkViaBot({ apiKey }).poll(async (event) => (isMessage(event) ? "Hola" : undefined))`. Lo que devuelve se manda a la charla del evento.
 
-**En Python o en n8n** hay SDK y nodos listos, sin dependencias: [sdks/python](../sdks/python) (`LinkviaBot`: verifica la firma, contesta, `send`, `edit`, `typing`, `stream`…) y [sdks/n8n](../sdks/n8n) (un trigger que verifica la firma, un nodo para escribir y tres plantillas para importar: menú con botones, agente con IA y aviso de pedido). Cómo instalarlos, en el README de cada uno. Todavía no están en PyPI ni en npm. **En Make** se arma con sus módulos de siempre (Webhooks, JSON, HTTP): los pasos, con la verificación de la firma, en `sdks/make`.
+**En Python o en n8n** hay SDK y nodos listos, sin dependencias: [sdks/python](../sdks/python) (`LinkviaBot`: verifica la firma, contesta, `send`, `edit`, `typing`, `stream`…) y [sdks/n8n](../sdks/n8n) (un trigger que verifica la firma, un nodo para escribir y tres plantillas para importar: menú con botones, agente con IA y aviso de pedido). Cómo instalarlos, en el README de cada uno. Todavía no están en PyPI ni en npm. **En Make** se arma con sus módulos de siempre (Webhooks, JSON, HTTP): los pasos, con la verificación de la firma, en [sdks/make](../sdks/make).
 
 ### Varios agentes con un solo webhook (cuenta de gestor)
 
@@ -151,6 +152,12 @@ curl -X POST https://app.linkvia.com.ar/api/bot/v0/messages \
   -d '{"contractVersion":"0","conversationId":"<id>","actions":[{"type":"text","text":"Tu turno es a las 10"}]}'
 ```
 
+### Una clave solo para el bot
+
+La clave de API (`lv_…`) abre mucho más que la API del bot: el panel, la configuración y, si las prendiste, las difusiones. Si el bot lo programa otra persona o vive en una plataforma de afuera (Prometheo, B2Chat, Cliengo, Botmaker…), dale la **clave del bot** (`lvb_…`): sirve solo para la API del bot (`/bot/v0/…` y la compatible con WhatsApp, `/wa/v21.0/…`, también para subir y bajar archivos) y para nada más. Con ella, cualquier otra ruta responde 403: no ve el panel ni las charlas desde ahí, no cambia el webhook ni las claves y no manda difusiones. La única ruta de `/business` que acepta es `PUT /business/shortcuts` (el menú de atajos, que el bot arma a su gusto; `setShortcuts` en el SDK).
+
+La crea el dueño en **Seguridad y claves** del panel (o con `POST /business/bot-key`) y se ve una sola vez. Se cambia o se borra desde el mismo lugar, y lo que usaba la anterior deja de andar en el momento; cada vez le llega un mail al dueño y queda en los últimos cambios. Se usa igual que la clave de API, en `Authorization: Bearer lvb_…`. Cambiar la clave de API la borra también (si alguien robó la de API pudo haberla creado), igual que sumar el mail del dueño a un negocio que no lo tenía: después se crea otra.
+
 ## 3. Responder
 
 La respuesta es `{"contractVersion":"0","actions":[...]}`:
@@ -160,7 +167,7 @@ La respuesta es `{"contractVersion":"0","actions":[...]}`:
 | `text` | `{"type":"text","text":"¡Hola!"}` |
 | `catalog` | `{"type":"catalog","items":[{"id":"muzza","title":"Muzzarella","priceCents":1200000,"currency":"ARS"}]}` |
 | `requestConsent` | `{"type":"requestConsent","dataTypes":["phone"],"purpose":"Avisarte cuando sale tu pedido"}` |
-| `handoff` | `{"type":"handoff","reason":"Pidió hablar con una persona"}` |
+| `handoff` | `{"type":"handoff","reason":"Pidió hablar con una persona"}`; con `"team":"ventas"` va a un área (sección 4) |
 | `notice` | `{"type":"notice","id":"pedido-1042","title":"Cuando salga tu pedido","text":"¿Te aviso cuando salga tu pedido?","days":1}` |
 | `image` | `{"type":"image","url":"https://tu-bot.com/fotos/muzza.jpg","caption":"La muzza de hoy"}` |
 | `document` | `{"type":"document","url":"https://tu-bot.com/tickets/1042.pdf","filename":"ticket-1042.pdf"}` |
@@ -184,6 +191,20 @@ También se entiende el Markdown que escriben los modelos de IA, así no hace fa
 
 **Fotos, archivos, audios y videos:** `image` acepta JPG, PNG, WebP o GIF; `document` acepta PDF, Word, Excel, PowerPoint, OpenOffice, TXT y CSV (el tipo sale de la extensión de `filename` y se comprueba con el contenido: un `.xlsx` que no es un Excel no pasa); `audio` acepta OGG/Opus, MP3, M4A o WebM y se ve como un mensaje de voz (sirve para un agente que contesta hablando; `durationMs` es opcional, en milisegundos enteros y de hasta 15 minutos; si no viene, la app la lee del archivo). `video` acepta MP4, WebM o MOV de hasta 16 MB y se reproduce en la burbuja (el tamaño y la duración los saca la app del archivo). Los demás, de hasta 4 MB; `caption` es opcional en fotos, archivos y videos. Linkvia baja el archivo de `url` en el momento y lo guarda, así que el link tiene que ser `https` (con un dominio, sin usuario ni clave adentro y de hasta 8000 caracteres, para que entren los links firmados), público y responder en menos de 10 segundos (20 si es un video); después puede vencer. Linkvia mira los primeros bytes: si no se puede bajar o no tiene la forma del tipo que dice, el usuario ve un aviso en su lugar. Cuando el bot escribe por su cuenta (`POST /bot/v0/messages`), en cambio, la respuesta es un error 400 que dice qué pasó.
 
+**Subir un archivo una vez y mandarlo muchas veces:** en vez de `url`, una foto, video, audio o documento puede llevar `mediaId`, el id de un archivo que tu bot subió antes (como en WhatsApp). Sirve para lo que mandás seguido (la carta en PDF, el video del local) y para archivos que no están en un link público. Se sube con el archivo crudo y su tipo:
+
+```http
+POST https://app.linkvia.com.ar/api/bot/v0/media?filename=carta.pdf
+Authorization: Bearer lv_…
+Content-Type: application/pdf
+
+<los bytes del archivo>
+```
+
+La respuesta es `{"id":"…"}`, y después: `{"type":"document","mediaId":"…","filename":"carta.pdf"}`. El id sirve solo para tu negocio, se puede mandar las veces que quieras y **vence a los 30 días** (después, subilo de nuevo). Una acción lleva `url` o `mediaId`, no los dos. Se aceptan los mismos tipos y pesos que con `url` (hasta 16 MB un video, 4 MB lo demás); al subirlo se revisa que sea una foto, video, audio o documento y que no pase su peso, y al mandarlo se revisa como uno bajado de un link. Hasta 200 archivos por día, 30 por minuto y de a 2 a la vez, y entre todos los que tengas guardados, hasta 200 MB (reusá los ids). Con el SDK: `const { id } = await bot.uploadMedia(bytes, { contentType: "application/pdf", filename: "carta.pdf" })`.
+
+Si tu bot está en TypeScript y **lee** el `url` de una acción de foto, video, audio o documento (no solo la arma), ahora es `string | undefined`: puede venir `mediaId` en su lugar.
+
 **Botones, listas y tarjetas**, como los mensajes interactivos de WhatsApp Business:
 
 - `buttons` lleva de 1 a 3 botones de respuesta rápida. `list` abre una lista de hasta 10 opciones en total, agrupadas en `sections`; `button` es lo que dice el botón que la abre. `carousel` lleva de 1 a 10 tarjetas que se deslizan, cada una con `title`, y opcionalmente `description`, `imageUrl` (se baja como las fotos; si falla, la tarjeta va sin foto) y hasta 2 `buttons` o un `link`. Las fotos de las tarjetas cuentan para el tope de 10 fotos, videos, audios o archivos por respuesta: con `POST /bot/v0/messages` pasarlo da 400, y en una respuesta al webhook el carrusel que lo pasa sale sin fotos (desde noviembre de 2026).
@@ -205,6 +226,10 @@ También se entiende el Markdown que escriben los modelos de IA, así no hace fa
 ## 4. Escribir después (handoff, avisos de pedido)
 
 **Pasar a una persona:** con la acción `handoff` la charla aparece arriba en la bandeja **Atención** del panel, marcada "Pide una persona". Ahí alguien del negocio la toma, le contesta con su nombre (el usuario lo ve arriba de cada mensaje) y, al terminar, se la devuelve al bot. Mientras la atiende una persona, los mensajes del usuario no le llegan al bot (tampoco a la cola si el bot está caído); hasta que alguien la toma, le siguen llegando. Una persona también puede tomar cualquier charla aunque el bot no haya pedido el pase. La bandeja también se maneja por API: ver la tabla del panel, abajo.
+
+**A qué área:** si el negocio armó áreas en **Equipo** (por ejemplo `ventas`, `soporte`), el handoff puede decir a cuál va con `team`: `{"type":"handoff","reason":"Quiere cambiar el plan","team":"ventas"}`. Lo elige tu agente con lo que charló, no un menú. La charla sale en Atención marcada "Para Ventas" y, con el reparto prendido, le llega primero a alguien de esa área. Los ids de las áreas están en `attentionAreas` de `GET /business` (`[{"id":"ventas","name":"Ventas"}]`). Si mandás el nombre ("Ventas", "Atención al público") se pasa a id solo. Un `team` que no es un área del negocio no da error: la charla pasa a una persona igual, sin área. `team` es opcional; sin él, todo sigue como antes.
+
+### Escribir cuando quieras
 
 Si el agente tarda, el bot puede escribir cuando quiera en una conversación existente:
 
@@ -231,6 +256,8 @@ curl -X DELETE https://app.linkvia.com.ar/api/bot/v0/messages/<id> -H "authoriza
 ```
 
 Sirve para un pedido que cambia de estado en la misma burbuja o un carrito con + y −. Las fotos, archivos, carruseles y respuestas de a partes que se están escribiendo no se editan. Con el SDK: `bot.edit(id, action)` y `bot.delete(id)`.
+
+**Reaccionar a un mensaje del usuario**, como un negocio en WhatsApp (un 👍 a "¿me confirmás el pedido?"): `PUT /bot/v0/messages/<id>/reaction` con `{"emoji":"👍"}`, donde `<id>` es el del mensaje que te llegó en el evento. Un solo emoji por mensaje: otro lo reemplaza y `{"emoji":""}` lo saca. El usuario lo ve colgando de su burbuja. No es un mensaje: no le llega aviso ni cuenta para el tope. Solo a mensajes del usuario de las últimas 48 horas, no mientras la charla la atiende una persona, y hasta 30 por minuto en cada charla (después, 429). Responde `{"messageId","emoji"}`; 400 si no es un solo emoji y 404 si el mensaje no es del usuario o no es de una charla tuya. Con el SDK: `bot.react(id, "👍")`.
 
 **Mini apps en el chat** (`webApp`). Un botón que abre **una página tuya adentro del chat**, sin salir de Linkvia, como las Web Apps de Telegram: la carta con carrito, un turnero, un formulario largo. Lleva `text` (hasta 1024 caracteres), `label` (el botón, hasta 24) y `url`; los textos más largos se recortan y no lleva `header` ni `footer`. La `url` es un link `https` completo de hasta 2000 caracteres, con un dominio público (ni una IP ni `localhost`), sin `#` y sin usuario ni clave adentro; vuelve normalizada. Pasa por los mismos controles que cualquier link (ver "Links y estafas").
 
@@ -390,6 +417,7 @@ En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con
 | `GET /business/stats?days=30` (o `?desde=AAAA-MM-DD&hasta=AAAA-MM-DD`, hasta 90 días) | Estadísticas del período, solo números: mensajes por día y por hora, tiempo de respuesta del bot, charlas atendidas por una persona, personas nuevas y que vuelven, y errores del webhook por día y por motivo. Con menos de 3 personas no van el reparto ni las horas. 120 consultas por hora |
 | `GET /business/health` | Últimos éxitos y fallas del bot |
 | `POST /business/rotate-api-key` | Cambia la clave de API y devuelve la nueva (una sola vez). La anterior deja de servir en el momento. Si el negocio tiene dueño, pide la sesión del dueño (con la clave sola: 403) |
+| `POST /business/bot-key`, `DELETE /business/bot-key` | Crea (o cambia) la clave del bot y la devuelve una sola vez, o la borra. La anterior deja de servir en el momento. Si el negocio tiene dueño, pide la sesión del dueño (con la clave sola: 403). `GET /business` dice `hasBotKey`, nunca la clave. Ver "Una clave solo para el bot" |
 | `POST /business/rotate-webhook-secret` | Cambia el secreto del webhook y devuelve el nuevo. Los eventos siguientes se firman con él. Si el negocio tiene dueño, pide la sesión del dueño (con la clave sola: 403) |
 | `GET /business/changes` | Últimos cambios sensibles (nombre, webhook, claves, dueño, ingresos al panel, baja): qué, quién (`owner` con su mail, `api_key` o `linkvia`), desde qué IP y cuándo. Con la clave sola no vienen la IP ni los mails del dueño: solo con la sesión del dueño |
 | `GET /business/deliveries` | Últimas entregas al webhook: evento, si respondió, cuánto tardó y el error |
@@ -403,7 +431,13 @@ En `https://app.linkvia.com.ar/api`, con `authorization: Bearer <apiKey>`, o con
 | `POST /business/conversations/<id>/summary` | Resumen con IA de la charla, si está prendido (100 por día) |
 | `GET /business/attention`, `PUT /business/canned-replies`, `PUT /business/hours` | Respuestas guardadas y horario de atención (ver "Panel del negocio"). Fuera de horario, ante un `handoff` el usuario recibe el mensaje del negocio; el bot no |
 | `GET /business/events` | Avisos en el momento de qué charla cambió (Server-Sent Events), para la bandeja |
-| `GET`, `POST /business/team`, `PATCH` y `DELETE /business/team/<id>` | El equipo del negocio, solo con la sesión del dueño: `{"email","name","role":"empleado"|"gestor","canSeeChats"}`. Un empleado entra con su mail y solo ve Atención; un gestor administra el agente (perfil, bot, estadísticas) sin tocar claves, webhook ni equipo, y ve los chats solo con `canSeeChats: true` (`PATCH` lo cambia) |
+
+### Equipo, mis agentes y la cuenta
+
+| Ruta | Qué hace |
+| --- | --- |
+| `GET`, `POST /business/team`, `PATCH` y `DELETE /business/team/<id>` | El equipo del negocio, solo con la sesión del dueño: `{"email","name","role":"empleado"|"gestor","canSeeChats"}`. Un empleado entra con su mail y solo ve Atención; un gestor administra el agente (perfil, bot, estadísticas) sin tocar claves, webhook ni equipo, y ve los chats solo con `canSeeChats: true` (`PATCH` lo cambia, igual que `areas`: los ids de las áreas de esa persona) |
+| `PUT /business/attention-areas` | Las áreas de Atención: `{"attentionAreas":[{"name":"Ventas"},{"id":"soporte","name":"Soporte técnico"}]}`, hasta 10. Sin `id`, se arma con el nombre. Sacar un área se la saca a quienes la tenían |
 | `GET /business/agents` | "Mis agentes": todos los agentes que abre el mail de la sesión (los suyos, los que administra como gestor y los equipos en que está), con `role`, si el bot responde, el plan, el tipo y el uso del mes, más cuántos administra (`managed`) y la cuota del gestor (`feeUsd`: hasta 5, 0; de 6 a 25, 15; más de 25, 39). Solo con la sesión del mail (con la clave: 403) |
 | `GET /business/manager-billing`, `POST /business/manager-billing/subscribe` y `/cancel` | La cuota del gestor: cuánto es hoy (`agents`, `feeUsd`, `amount` en pesos) y su débito de Mercado Pago (`{"payerEmail"}` devuelve `checkoutUrl`). Solo con la sesión del mail |
 | `GET`, `PUT`, `DELETE /business/manager-account`, `POST …/rotate-api-key`, `POST …/rotate-webhook-secret`, `PUT …/agents/<handle>` | La cuenta de gestor: un webhook y una clave para varios de tus agentes (ver "Varios agentes con un solo webhook"). Solo con la sesión del mail, nunca con una clave. |

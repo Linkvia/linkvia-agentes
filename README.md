@@ -49,6 +49,7 @@ La guía paso a paso está en **[docs/empezar-en-5-minutos.md](docs/empezar-en-5
 | [ejemplos/python/bot.py](ejemplos/python/bot.py) | Bot mínimo en Python 3.9+, sin dependencias |
 | [sdks/python/](sdks/python/) | SDK para Python: verifica la firma, contesta, escribe después, edita y manda respuestas de a partes |
 | [sdks/n8n/](sdks/n8n/) | Nodos para n8n: un trigger con la firma verificada, un nodo para contestar y tres flujos de ejemplo para importar |
+| [sdks/make/](sdks/make/) | Make: los pasos para armar el bot con sus módulos de siempre (Webhooks, JSON, HTTP), con la verificación de la firma |
 | [plantillas/](plantillas/) | **Agentes listos para vender** a negocios: turnos de belleza, gastronomía con delivery y take away, canchas y clases. Con panel, seña y cobro |
 | [casos/](casos/) | **Ideas de agentes de consumo** con cómo cobrarlos: vencimientos, gastos, inglés, lista de compras y más |
 | [docs/cobrar-con-mercado-pago.md](docs/cobrar-con-mercado-pago.md) | Cómo cobra tu agente con la cuenta de Mercado Pago del negocio |
