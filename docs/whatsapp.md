@@ -42,7 +42,7 @@ El mismo sobre que manda Meta: `object: "whatsapp_business_account"` → `entry[
 
 Con `POST /api/wa/v21.0/{handle}/messages`:
 
-- `text`
+- `text` (con link, siempre se ve la vista previa: `preview_url` no hace falta y se ignora)
 - `image`, `video`, `document` y `audio` con `link` (https público, con un dominio y sin usuario ni clave adentro; lo mismo vale para la `url` de un `cta_url`, ver "Cómo tiene que ser un link" en [Conectar el bot de un negocio](conectar-un-bot.md)) o con el `id` de un archivo subido (abajo). Un `video` puede ser MP4, WebM o MOV de hasta 16 MB, con `caption`. Un `document` puede ser PDF, Word, Excel, PowerPoint, OpenOffice, TXT o CSV, según la extensión de `filename` (si no viene, se toma la del `link` o el nombre con que se subió), y un `audio`, OGG/Opus, MP3, M4A o WebM; se ve como un mensaje de voz.
 - `sticker` (con `link` o `id`): se ve como una foto, porque Linkvia todavía no tiene stickers.
 - `location`
