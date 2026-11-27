@@ -5,10 +5,9 @@ Para armar el agente de un negocio en n8n sin nodos genéricos: el **Linkvia Tri
 Cuando estén en npm (todavía no), se instalan desde n8n: **Settings → Community nodes → Install** con `n8n-nodes-linkvia`. Mientras tanto, en un n8n propio, como paquete en la carpeta de nodos de n8n:
 
 ```bash
-git clone https://github.com/linkvia/linkvia-agentes /tmp/linkvia-agentes
-cd /tmp/linkvia-agentes/sdks/n8n && npm pack          # arma n8n-nodes-linkvia-0.1.0.tgz
+cd /ruta/al/repo/sdks/n8n && npm pack          # arma n8n-nodes-linkvia-0.1.0.tgz
 mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes
-npm install /tmp/linkvia-agentes/sdks/n8n/n8n-nodes-linkvia-0.1.0.tgz
+npm install /ruta/al/repo/sdks/n8n/n8n-nodes-linkvia-0.1.0.tgz
 # reiniciá n8n
 ```
 
@@ -31,7 +30,7 @@ Con Docker, lo mismo dentro de `/home/node/.n8n/nodes`. No tiene dependencias. N
    - **Con lo que devuelve el último nodo**: el flujo contesta en la misma llamada; su último nodo devuelve `{"contractVersion":"0","actions":[…]}`, en menos de 10 segundos.
    - **Con el nodo Respond to Webhook (versión 1)**: lo mismo, pero con ese nodo. Las versiones nuevas de Respond to Webhook solo andan después del nodo Webhook de n8n, así que conviene la opción anterior.
 
-El evento sale tal cual llega (ver [Conectar el bot de un negocio](../../docs/conectar-un-bot.md)): `{{ $json.message.text }}`, `{{ $json.conversation.id }}`, `{{ $json.message.choice.id }}`…
+El evento sale tal cual llega (ver `docs/conectar-un-bot.md`): `{{ $json.message.text }}`, `{{ $json.conversation.id }}`, `{{ $json.message.choice.id }}`…
 
 ## Linkvia
 
@@ -58,3 +57,7 @@ En `plantillas/` hay tres flujos listos para importar (**Workflows → Import fr
 | `aviso-de-pedido.json` | Para tu sistema de pedidos: un webhook propio (con una clave en un encabezado) que recibe `{"conversationId", "pedido", "minutos", "aviso"}` y le escribe al cliente que su pedido salió. |
 
 Las tres se probaron en n8n 2.46 con eventos firmados como los manda Linkvia.
+
+## Tests
+
+`pnpm test` los prueba con un n8n de mentira (`packages/sdk/src/n8n.test.ts`).

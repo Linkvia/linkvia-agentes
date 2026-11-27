@@ -29,7 +29,7 @@ def responder(evento):
 bot.serve(responder, port=4000)
 ```
 
-`responder` puede devolver `None`, un texto, una acción (`{"type": "buttons", …}`) o una lista de acciones, con el formato de [Conectar el bot de un negocio](../../docs/conectar-un-bot.md). Para contestar un `buttonTap` con un aviso breve, `Toast("Anotado", "Tu pedido quedó guardado")`.
+`responder` puede devolver `None`, un texto, una acción (`{"type": "buttons", …}`) o una lista de acciones, con el formato de `docs/conectar-un-bot.md`. Para contestar un `buttonTap` con un aviso breve, `Toast("Anotado", "Tu pedido quedó guardado")`.
 
 Las claves van siempre en variables de entorno, nunca en el código.
 
