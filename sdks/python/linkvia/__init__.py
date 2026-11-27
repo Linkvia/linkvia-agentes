@@ -17,7 +17,7 @@ Con Flask, FastAPI o Django se usa ``bot.handle(cuerpo_crudo, encabezado_de_firm
 que devuelve el código HTTP y el cuerpo de la respuesta.
 
 Si el cliente escribe "¿les queda budín de mistol para el sábado?", ``evento["message"]["text"]``
-trae ese texto tal cual, sin el teléfono ni el nombre: esos llegan solo si el cliente los compartió.
+trae ese texto tal cual. El celular viene en ``evento["user"]["phone"]``; el nombre, solo si el cliente lo compartió.
 """
 
 from __future__ import annotations
